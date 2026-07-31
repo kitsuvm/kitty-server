@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "remove" ]; then
+    # Reload SSH to cleanly remove the subsystem from active memory
+    if systemctl is-active --quiet ssh; then
+        systemctl reload ssh || true
+    fi
+fi
+
+exit 0

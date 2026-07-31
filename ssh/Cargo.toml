@@ -14,10 +14,14 @@ rust-version.workspace = true
 
 [package.metadata.deb]
 maintainer = "Kitsu/VM <kitsuvm@gmail.com>"
-copyright = "2026 Kitsu/VM"
 depends = "$auto"
 suggests = "kitty-server-daemon (>= 0.1.0)"
+maintainer-scripts = "debian/"
+assets = [
+    ["target/release/kitty-server-ssh", "usr/libexec/", "755"],
+    ["debian/kitty-server.conf", "etc/ssh/sshd_config.d/", "644"]
+]
 
 [dependencies.tokio]
 workspace = true
-features = ["rt-multi-thread", "net"]
+features = ["rt-multi-thread", "net", "io-std"]
