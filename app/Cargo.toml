@@ -1,5 +1,6 @@
 [package]
 name = "kitty-server-app"
+description = "Graphical user interface for the Kitty Server."
 version = "0.1.0"
 keywords = ["kitty", "server", "app"]
 authors.workspace = true
