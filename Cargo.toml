@@ -6,3 +6,22 @@ members = [
     "daemon",
     "ssh"
 ]
+
+[workspace.package]
+authors = ["Kitsu/VM <kitsuvm@gmail.com>"]
+repository = "https://github.com/kitsuvm/kitty-server"
+edition = "2024"
+license = "AGPL-3.0-or-later"
+readme = "README.md"
+publish = false
+rust-version = "1.97.1"
+
+[workspace.build-dependencies]
+prost-build = "0.14.4"
+
+[workspace.dependencies]
+prost = "0.14.4"
+sysinfo = "0.39.6"
+tokio = "1.53.1"
+unsigned_varint = "0.8.0"
+uzers = "0.12.2"
