@@ -2,7 +2,7 @@
 name = "kitty-server-ssh"
 description = "SSH subsystem for the Kitty Server."
 version = "0.0.1-alpha.1"
-keywords = ["kitty", "server", "ssh", "subsystem", "panel"]
+keywords = ["kitty", "server", "ssh", "subsystem"]
 categories = ["command-line-utilities"]
 authors.workspace = true
 repository.workspace = true
