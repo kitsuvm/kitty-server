@@ -15,4 +15,4 @@ rust-version.workspace = true
 [dependencies]
 tokio = { workspace = true }
 tokio-util = { workspace = true, features = ["codec"] }
-unsigned_varint = { workspace = true, features = ["codec"] }
+unsigned-varint = { workspace = true, features = ["codec"] }
