@@ -23,11 +23,16 @@ checksum = "e34418ac499d6305c2fb5ad0ed2f6ac998c5f8ca209b4510f7f94242c647e307"
 [[package]]
 name = "kitty-server-app"
 version = "0.0.1-alpha.1"
+dependencies = [
+ "kitty-server-common",
+]
 
 [[package]]
 name = "kitty-server-common"
 version = "0.0.1-alpha.1"
 dependencies = [
+ "futures-core",
+ "futures-sink",
  "tokio",
  "tokio-util",
  "unsigned-varint",
@@ -36,15 +41,22 @@ dependencies = [
 [[package]]
 name = "kitty-server-daemon"
 version = "0.0.1-alpha.1"
+dependencies = [
+ "kitty-server-runtime",
+]
 
 [[package]]
 name = "kitty-server-runtime"
 version = "0.0.1-alpha.1"
+dependencies = [
+ "kitty-server-common",
+]
 
 [[package]]
 name = "kitty-server-ssh"
 version = "0.0.1-alpha.1"
 dependencies = [
+ "kitty-server-runtime",
  "tokio",
 ]
 

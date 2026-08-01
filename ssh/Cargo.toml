@@ -22,6 +22,6 @@ assets = [
     ["debian/kitty-server.conf", "etc/ssh/sshd_config.d/", "644"]
 ]
 
-[dependencies.tokio]
-workspace = true
-features = ["rt-multi-thread", "net", "io-std"]
+[dependencies]
+kitty-server-runtime = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "net", "io-std"] }

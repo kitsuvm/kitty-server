@@ -19,3 +19,4 @@ depends = "$auto"
 suggests = "kitty-server-ssh (>= 0.1.0)"
 
 [dependencies]
+kitty-server-runtime = { workspace = true }

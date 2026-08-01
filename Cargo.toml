@@ -21,6 +21,10 @@ rust-version = "1.97.1"
 prost-build = "0.14.4"
 
 [workspace.dependencies]
+futures-core = "0.3.33"
+futures-sink = "0.3.33"
+kitty-server-common = { path = "common", version = "0.0.1-alpha.1" }
+kitty-server-runtime = { path = "runtime", version = "0.0.1-alpha.1" }
 prost = "0.14.4"
 sysinfo = "0.39.6"
 tokio = "1.53.1"

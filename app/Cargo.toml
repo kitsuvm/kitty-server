@@ -12,3 +12,4 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+kitty-server-common = { workspace = true }

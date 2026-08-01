@@ -13,6 +13,8 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+futures-core = { workspace = true }
+futures-sink = { workspace = true }
 tokio = { workspace = true }
 tokio-util = { workspace = true, features = ["codec"] }
 unsigned-varint = { workspace = true, features = ["codec"] }
