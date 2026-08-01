@@ -4,7 +4,8 @@ members = [
     "common",
     "app",
     "daemon",
-    "ssh"
+    "ssh",
+    "runtime"
 ]
 
 [workspace.package]
