@@ -1,0 +1,11 @@
+[Unit]
+Description=Unix Socket for Kitty Server Daemon.
+
+[Socket]
+ListenStream=/run/kitty-server.sock
+SocketUser=root
+SocketGroup=kitty-server
+SocketMode=0660
+
+[Install]
+WantedBy=sockets.target

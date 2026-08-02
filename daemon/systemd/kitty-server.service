@@ -1,0 +1,12 @@
+[Unit]
+Description=Kitty Server
+Requires=kitty-server.socket
+After=kitty-server.socket
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/kitty-server
+TimeoutStopSec=5
+Restart=on-failure

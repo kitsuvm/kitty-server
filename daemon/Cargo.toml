@@ -13,10 +13,15 @@ publish.workspace = true
 rust-version.workspace = true
 
 [package.metadata.deb]
+maintainer-scripts = "systemd/"
 maintainer = "Kitsu/VM <kitsuvm@gmail.com>"
 copyright = "2026 Kitsu/VM"
 depends = "$auto"
 suggests = "kitty-server-ssh (>= 0.1.0)"
+systemd-units = [
+    { unit-name = "kitty-server.service", enable = false, start = false },
+    { unit-name = "kitty-server.socket", enable = true, start = true }
+]
 
 [dependencies]
 kitty-server-runtime = { workspace = true }
