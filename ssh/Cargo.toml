@@ -23,5 +23,6 @@ assets = [
 ]
 
 [dependencies]
+clap = { workspace = true, features = ["derive"] }
 kitty-server-runtime = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread", "net", "io-std"] }

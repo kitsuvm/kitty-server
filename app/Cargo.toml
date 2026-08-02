@@ -11,5 +11,30 @@ readme.workspace = true
 publish.workspace = true
 rust-version.workspace = true
 
+[package.metadata.packager]
+before-packaging-command = "cargo build --release"
+version = "0.0.1"
+category = "Utility"
+product_name = "Kitty Server"
+identifier = "com.kitsuvm.kitty-server"
+publisher = "Kitsu/VM"
+formats = ["deb", "pacman", "nsis", "wix"]
+nsis = { installer-mode = "both" }
+license-file = "../LICENSE.txt"
+linux = { generate_desktop_entry = true }
+
+[package.metadata.generate-rpm]
+version = "0.0.1"
+assets = [
+    { source = "target/release/kitty-server-app", dest = "/usr/bin/kitty-server" },
+    { source = "kitty-server.desktop", dest = "/usr/share/applications/kitty-server.desktop" }
+#   { source = "kitty-server.svg", dest = "/usr/share/icons/hicolor/scalable/apps/kitty-server.svg" }
+]
+
+[build-dependencies]
+winres = { workspace = true }
+
 [dependencies]
+clap = { workspace = true, features = ["derive"] }
 kitty-server-common = { workspace = true }
+iced = { workspace = true, features = ["tiny-skia", "linux-theme-detection", "wayland", "tokio"] }

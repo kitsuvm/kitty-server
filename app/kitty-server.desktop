@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Kitty Server
+Exec=/usr/bin/kitty-server
+Icon=kitty-server
+Type=Application
+Categories=Utility;
