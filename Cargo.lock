@@ -1234,6 +1234,7 @@ version = "0.0.1-alpha.1"
 dependencies = [
  "clap",
  "iced",
+ "iced_core",
  "kitty-server-common",
  "winres",
 ]
