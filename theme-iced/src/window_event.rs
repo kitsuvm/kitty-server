@@ -8,7 +8,7 @@ use iced::{
     },
 };
 
-use crate::widget::{window, window_resize};
+use crate::widget::{window_background, window_resize};
 
 /// Represents the state of a window.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -23,12 +23,12 @@ impl AsRef<State> for State {
     }
 }
 
-impl From<&State> for window::Status {
+impl From<&State> for window_background::Status {
     fn from(state: &State) -> Self {
         if state.maximized {
-            window::Status::Maximized
+            window_background::Status::Maximized
         } else {
-            window::Status::Normal
+            window_background::Status::Normal
         }
     }
 }

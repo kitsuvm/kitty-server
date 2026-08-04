@@ -6,22 +6,22 @@ pub use text::text;
 pub mod application;
 pub mod icon;
 pub mod text;
-pub mod window;
+pub mod window_background;
 //pub mod window_bar;
 pub mod window_button;
 pub mod window_resize;
 
 /// Creates a new [`Window`] widget with the given content.
-pub fn window<'a, Message, Theme, Renderer>(
+pub fn window_background<'a, Message, Theme, Renderer>(
     content: impl Into<iced::Element<'a, Message, Theme, Renderer>>,
-) -> window::Window<'a, Message, Theme, Renderer>
+) -> window_background::WindowBackground<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: window::Catalog + iced::widget::container::Catalog + 'a,
+    Theme: window_background::Catalog + iced::widget::container::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as window::Catalog>::Class<'a>: Into<window::StyleFn<'a, Theme>>,
+    <Theme as window_background::Catalog>::Class<'a>: Into<window_background::StyleFn<'a, Theme>>,
 {
-    window::Window::new(content)
+    window_background::WindowBackground::new(content)
 }
 
 /// Creates a new [`WindowResize`] widget with the given content.

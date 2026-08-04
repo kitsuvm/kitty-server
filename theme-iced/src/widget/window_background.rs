@@ -34,7 +34,7 @@ pub trait Catalog {
 }
 
 /// A window widget that contains content and applies styles based on the theme and status.
-pub struct Window<'a, Message, Theme, Renderer>
+pub struct WindowBackground<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + container::Catalog + 'a,
@@ -48,7 +48,7 @@ where
     class: <Theme as Catalog>::Class<'a>,
 }
 
-impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer>
+impl<'a, Message, Theme, Renderer> WindowBackground<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + container::Catalog + 'a,
@@ -84,7 +84,7 @@ where
     }
 }
 
-impl<'a, Message, Theme, Renderer> From<Window<'a, Message, Theme, Renderer>>
+impl<'a, Message, Theme, Renderer> From<WindowBackground<'a, Message, Theme, Renderer>>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
@@ -93,7 +93,7 @@ where
     <Theme as iced::widget::container::Catalog>::Class<'a>:
         From<iced::widget::container::StyleFn<'a, Theme>>,
 {
-    fn from(window: Window<'a, Message, Theme, Renderer>) -> Self {
+    fn from(window: WindowBackground<'a, Message, Theme, Renderer>) -> Self {
         let widget = container(window.content)
             .width(Length::Fill)
             .height(Length::Fill)

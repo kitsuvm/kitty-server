@@ -8,7 +8,7 @@ use iced::{
     widget::{button, container, text},
 };
 
-use crate::widget::{application, window};
+use crate::widget::{application, window_background};
 
 /// The name of the theme.
 pub const THEME_NAME: &str = "kitty";
@@ -127,20 +127,20 @@ impl button::Catalog for Theme {
     }
 }
 
-impl window::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme, window::Status) -> container::Style>;
+impl window_background::Catalog for Theme {
+    type Class<'a> = Box<dyn Fn(&Theme, window_background::Status) -> container::Style>;
 
     fn padding() -> Option<Padding> {
         Some(Padding::from(1))
     }
 
     fn default<'a>() -> Self::Class<'a> {
-        Box::new(|theme: &Theme, status: window::Status| {
+        Box::new(|theme: &Theme, status: window_background::Status| {
             let palette = theme.palette();
 
             container::Style {
                 border: match status {
-                    window::Status::Normal => Border {
+                    window_background::Status::Normal => Border {
                         radius: Radius::from(10.0),
                         color: match *theme {
                             Theme::Light => color!(0xd1d1d1),
@@ -148,7 +148,7 @@ impl window::Catalog for Theme {
                         },
                         width: 1.2,
                     },
-                    window::Status::Maximized => Border::default(),
+                    window_background::Status::Maximized => Border::default(),
                 },
                 background: Some(palette.background.into()),
                 ..Default::default()
@@ -156,7 +156,11 @@ impl window::Catalog for Theme {
         })
     }
 
-    fn style(&self, class: &Self::Class<'_>, status: window::Status) -> container::Style {
+    fn style(
+        &self,
+        class: &Self::Class<'_>,
+        status: window_background::Status,
+    ) -> container::Style {
         class(self, status)
     }
 }

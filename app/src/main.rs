@@ -7,7 +7,7 @@ use iced::{
 use kitty_theme_iced::{
     font::load_all,
     theme::Theme,
-    widget::{application::application_style, text, window, window_resize},
+    widget::{application::application_style, text, window_background, window_resize},
     window_event,
 };
 
@@ -58,7 +58,7 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 /// Renders the view of the application.
 fn view(state: &State) -> window_resize::WindowResize<'_, Message, Theme, Renderer> {
     window_resize(
-        window(column![
+        window_background(column![
             container(text("Hello Kitty!")).padding(Padding::from(5))
         ])
         .status(state.window_state.as_ref().into()),
