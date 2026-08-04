@@ -1,13 +1,16 @@
 //! Graphical user interface for the Kitty Server.
 
 use iced::{
-    Element, Length, Padding, Renderer, Subscription, Task,
-    widget::{column, container},
+    Padding, Renderer, Subscription, Task,
+    widget::{column, container, row},
 };
 use kitty_theme_iced::{
     font::load_all,
     theme::Theme,
-    widget::{application::application_style, text, window_background, window_resize},
+    widget::{
+        application::application_style, icon, text, window_background, window_bar, window_button,
+        window_resize,
+    },
     window_event,
 };
 
@@ -59,6 +62,25 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 fn view(state: &State) -> window_resize::WindowResize<'_, Message, Theme, Renderer> {
     window_resize(
         window_background(column![
+            window_bar(text("Kitty Server").size(14).center())
+                .buttons(row![
+                    window_button(icon(icon::MINIMIZE_ICON))
+                        .position(window_button::Position::Left)
+                        .on_press(Message::Window(window_event::Event::Minimize)),
+                    window_button(icon(match state.window_state.maximized {
+                        true => icon::UNMAXIMIZE_ICON,
+                        false => icon::MAXIMIZE_ICON,
+                    }))
+                    .position(window_button::Position::Center)
+                    .on_press(Message::Window(window_event::Event::Maximize)),
+                    window_button(icon(icon::CLOSE_ICON))
+                        .position(window_button::Position::Right)
+                        .on_press(Message::Window(window_event::Event::Close))
+                        .style(window_button::danger)
+                        .no_rounded_corner(state.window_state.maximized),
+                ])
+                .on_press(Message::Window(window_event::Event::Drag))
+                .on_double_click(Message::Window(window_event::Event::Maximize)),
             container(text("Hello Kitty!")).padding(Padding::from(5))
         ])
         .status(state.window_state.as_ref().into()),

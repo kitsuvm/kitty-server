@@ -8,7 +8,7 @@ use iced::{
     widget::{button, container, text},
 };
 
-use crate::widget::{application, window_background};
+use crate::widget::{application, window_background, window_button};
 
 /// The name of the theme.
 pub const THEME_NAME: &str = "kitty";
@@ -40,6 +40,16 @@ impl Theme {
             Theme::Light => Palette::LIGHT,
             Theme::Dark => DARK_PALETTE,
         }
+    }
+
+    /// Returns the radius for the window.
+    pub fn window_radius(&self) -> f32 {
+        10.0
+    }
+
+    /// Returns the border width for the window.
+    pub fn window_border_width(&self) -> f32 {
+        1.2
     }
 }
 
@@ -141,12 +151,12 @@ impl window_background::Catalog for Theme {
             container::Style {
                 border: match status {
                     window_background::Status::Normal => Border {
-                        radius: Radius::from(10.0),
+                        radius: Radius::from(theme.window_radius()),
                         color: match *theme {
                             Theme::Light => color!(0xd1d1d1),
                             Theme::Dark => color!(0x2d2d2d),
                         },
-                        width: 1.2,
+                        width: theme.window_border_width(),
                     },
                     window_background::Status::Maximized => Border::default(),
                 },
@@ -173,5 +183,44 @@ impl application::Catalog for Theme {
             background_color: Color::TRANSPARENT,
             text_color: palette.text,
         }
+    }
+}
+
+impl window_button::Catalog for Theme {
+    type Class<'a> = Box<dyn Fn(&Theme, window_button::Status) -> button::Style>;
+
+    fn default<'a>() -> Self::Class<'a> {
+        Box::new(|theme: &Theme, status: window_button::Status| {
+            let window_corner = match status.no_rounded_corner {
+                true => 0.0,
+                false => theme.window_radius(),
+            };
+
+            button::Style {
+                border: match (status.button_position, status.left_buttons) {
+                    (window_button::Position::Left, true) => Border {
+                        radius: Radius::from(0).top_left(window_corner),
+                        color: Color::TRANSPARENT,
+                        width: theme.window_border_width(),
+                    },
+                    (window_button::Position::Right, false) => Border {
+                        radius: Radius::from(0).top_right(window_corner),
+                        color: Color::TRANSPARENT,
+                        width: theme.window_border_width(),
+                    },
+                    _ => Border::default(),
+                },
+                background: match status.button_status {
+                    button::Status::Pressed => Some(theme.palette().primary.into()),
+                    button::Status::Hovered => Some(theme.palette().primary.into()),
+                    _ => None,
+                },
+                ..Default::default()
+            }
+        })
+    }
+
+    fn style(&self, class: &Self::Class<'_>, status: window_button::Status) -> button::Style {
+        class(self, status)
     }
 }

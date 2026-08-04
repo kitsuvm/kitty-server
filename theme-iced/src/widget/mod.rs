@@ -7,7 +7,8 @@ pub mod application;
 pub mod icon;
 pub mod text;
 pub mod window_background;
-//pub mod window_bar;
+pub mod window_bar;
+//pub mod window;
 pub mod window_button;
 pub mod window_resize;
 
@@ -22,6 +23,18 @@ where
     <Theme as window_background::Catalog>::Class<'a>: Into<window_background::StyleFn<'a, Theme>>,
 {
     window_background::WindowBackground::new(content)
+}
+
+/// Creates a new [`WindowBar`] widget with the given content.
+pub fn window_bar<'a, Message, Theme, Renderer>(
+    content: impl Into<iced::Element<'a, Message, Theme, Renderer>>,
+) -> window_bar::WindowBar<'a, Message, Theme, Renderer>
+where
+    Message: Clone + 'a,
+    Theme: iced::widget::container::Catalog + 'a,
+    Renderer: iced_core::renderer::Renderer + 'a,
+{
+    window_bar::WindowBar::new(content)
 }
 
 /// Creates a new [`WindowResize`] widget with the given content.

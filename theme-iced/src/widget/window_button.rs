@@ -1,5 +1,6 @@
 use iced::{
-    Element,
+    Element, color,
+    theme::Base,
     widget::{Button, button},
 };
 
@@ -23,6 +24,8 @@ pub struct Status {
     pub button_position: Position,
     /// If the window buttons are aligned to the left or right of the window.
     pub left_buttons: bool,
+    /// If the button should have no rounded corners.
+    pub no_rounded_corner: bool,
 }
 
 /// A catalog of styles for window buttons.
@@ -55,6 +58,8 @@ where
     left_buttons: bool,
     /// The style function for the button.
     class: <Theme as Catalog>::Class<'a>,
+    /// If the button should have no rounded corners.
+    no_rounded_corner: bool,
 }
 
 impl<'a, Message, Theme, Renderer> WindowButton<'a, Message, Theme, Renderer>
@@ -73,6 +78,7 @@ where
             position: Position::Center,
             left_buttons: false,
             class: <Theme as Catalog>::default(),
+            no_rounded_corner: false,
         }
     }
 
@@ -108,6 +114,12 @@ where
         self.class = class.into();
         self
     }
+
+    /// Sets whether the button should have no rounded corners.
+    pub fn no_rounded_corner(mut self, no_rounded_corner: bool) -> Self {
+        self.no_rounded_corner = no_rounded_corner;
+        self
+    }
 }
 
 impl<'a, Message, Theme, Renderer> From<WindowButton<'a, Message, Theme, Renderer>>
@@ -130,9 +142,26 @@ where
                         button_status: status,
                         button_position: window_button.position,
                         left_buttons: window_button.left_buttons,
+                        no_rounded_corner: window_button.no_rounded_corner,
                     },
                 )
             })
             .into()
+    }
+}
+
+pub fn danger<'a, Theme>(theme: &Theme, status: Status) -> button::Style
+where
+    Theme: Catalog + Base + button::Catalog + 'a,
+{
+    let base = <Theme as Catalog>::style(theme, &<Theme as Catalog>::default(), status);
+
+    if matches!(
+        status.button_status,
+        button::Status::Pressed | button::Status::Hovered
+    ) {
+        base.with_background(theme.palette().map_or(color!(0xff000), |p| p.danger))
+    } else {
+        base
     }
 }
