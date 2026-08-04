@@ -1234,8 +1234,8 @@ version = "0.0.1-alpha.1"
 dependencies = [
  "clap",
  "iced",
- "iced_core",
  "kitty-server-common",
+ "kitty-theme-iced",
  "winres",
 ]
 
@@ -1271,6 +1271,14 @@ dependencies = [
  "clap",
  "kitty-server-runtime",
  "tokio",
+]
+
+[[package]]
+name = "kitty-theme-iced"
+version = "0.0.1-alpha.1"
+dependencies = [
+ "iced",
+ "iced_core",
 ]
 
 [[package]]

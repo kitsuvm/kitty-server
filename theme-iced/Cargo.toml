@@ -1,0 +1,16 @@
+[package]
+name = "kitty-theme-iced"
+description = "Kitty Theme for Iced GUI Framework."
+version = "0.0.1-alpha.1"
+keywords = ["kitty", "theme", "iced"]
+authors.workspace = true
+repository.workspace = true
+edition.workspace = true
+license.workspace = true
+readme.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+iced = { workspace = true }
+iced_core = { workspace = true }

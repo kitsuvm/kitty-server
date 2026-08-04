@@ -4,10 +4,10 @@ use iced::{
     Border, Element, Length, Renderer,
     alignment::Horizontal,
     border::Radius,
-    widget::{MouseArea, button, container, mouse_area, row, space, text},
+    widget::{MouseArea, button, container, mouse_area, row, space},
 };
 
-use crate::{Message, fonts::MATERIAL_SYMBOLS_FILLED_ROUNDED_FONT, theme::Theme};
+use crate::{Message, theme::Theme};
 
 /// Creates a window bar with the given content and menu.
 pub fn window_bar<'a>(
@@ -32,14 +32,14 @@ pub fn window_bar<'a>(
     .align_x(Horizontal::Center);
 
     let buttons = row![
-        button(text("\u{e931}").font(MATERIAL_SYMBOLS_FILLED_ROUNDED_FONT))
-            .on_press(Message::Minimize),
-        button(
-            text(if is_maximized { "\u{f507}" } else { "\u{f830}" })
-                .font(MATERIAL_SYMBOLS_FILLED_ROUNDED_FONT)
-        )
+        button(text_icon(MINIMIZE_ICON)).on_press(Message::Minimize),
+        button(text_icon(if is_maximized {
+            UNMAXIMIZE_ICON
+        } else {
+            MAXIMIZE_ICON
+        }))
         .on_press(Message::Maximize),
-        button(text("\u{e5cd}").font(MATERIAL_SYMBOLS_FILLED_ROUNDED_FONT))
+        button(text_icon(CLOSE_ICON))
             .on_press(Message::Close)
             .style(move |theme: &Theme, status: button::Status| {
                 match (theme, status) {

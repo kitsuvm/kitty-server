@@ -38,4 +38,4 @@ winres = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 kitty-server-common = { workspace = true }
 iced = { workspace = true, features = ["tiny-skia", "linux-theme-detection", "wayland", "tokio"] }
-iced_core = { workspace = true }
+kitty-theme-iced = { workspace = true }
