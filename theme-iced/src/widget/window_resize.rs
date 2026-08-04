@@ -94,7 +94,7 @@ where
                 create_handle(
                     window_resize.size,
                     window_resize.size,
-                    Interaction::ResizingDiagonallyUp,
+                    Interaction::ResizingDiagonallyDown,
                     on_resize.as_ref().map(|f| f(Direction::NorthWest)),
                 ),
                 create_handle(
@@ -106,7 +106,7 @@ where
                 create_handle(
                     window_resize.size,
                     window_resize.size,
-                    Interaction::ResizingDiagonallyDown,
+                    Interaction::ResizingDiagonallyUp,
                     on_resize.as_ref().map(|f| f(Direction::NorthEast)),
                 ),
             ],
@@ -129,7 +129,7 @@ where
                 create_handle(
                     window_resize.size,
                     window_resize.size,
-                    Interaction::ResizingDiagonallyDown,
+                    Interaction::ResizingDiagonallyUp,
                     on_resize.as_ref().map(|f| f(Direction::SouthWest)),
                 ),
                 create_handle(
@@ -141,7 +141,7 @@ where
                 create_handle(
                     window_resize.size,
                     window_resize.size,
-                    Interaction::ResizingDiagonallyUp,
+                    Interaction::ResizingDiagonallyDown,
                     on_resize.as_ref().map(|f| f(Direction::SouthEast)),
                 ),
             ],
