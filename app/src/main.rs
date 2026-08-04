@@ -1,10 +1,10 @@
 //! Graphical user interface for the Kitty Server.
 
-use iced::{Element, Padding, Renderer, Subscription, Task, widget::container, window::Settings};
+use iced::{Element, Renderer, Subscription, Task, window::Settings};
 use kitty_theme_iced::{
     font::load_all,
     theme::Theme,
-    widget::{animated::window, application::application_style, text},
+    widget::{animated::window, application::application_style, scaffold, text},
     window_event,
 };
 
@@ -58,11 +58,15 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 
 /// Renders the view of the application.
 fn view(state: &State) -> Element<'_, Message, Theme, Renderer> {
-    window(container(text("Hello Kitty!")).padding(Padding::from(5)))
-        .on_event(Message::Window)
-        .window_state(&state.window_state)
-        .window_title(text("Kitty Server").size(14).center())
-        .into()
+    window(
+        scaffold(text("Hello Kitty!"))
+            .sidebar(text("Sidebar").size(14).center())
+            .bottom_sidebar(text("Sidebar").size(14).center()),
+    )
+    .on_event(Message::Window)
+    .window_state(&state.window_state)
+    .window_title(text("Kitty Server").size(14).center())
+    .into()
 }
 
 /// Subscribes to window resize events.

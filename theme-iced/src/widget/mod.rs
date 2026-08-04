@@ -7,6 +7,7 @@ pub use text::text;
 pub mod animated;
 pub mod application;
 pub mod icon;
+pub mod scaffold;
 pub mod text;
 pub mod window;
 pub mod window_background;
@@ -88,4 +89,18 @@ where
         + Into<iced_widget::button::StyleFn<'a, Theme>>,
 {
     window::Window::new(content)
+}
+
+/// Creates a new [`Scaffold`] widget with the given content.
+pub fn scaffold<'a, Message, Theme, Renderer>(
+    content: impl Into<Element<'a, Message, Theme, Renderer>>,
+) -> scaffold::Scaffold<'a, Message, Theme, Renderer>
+where
+    Message: Clone + 'a,
+    Theme: scaffold::Catalog + iced_widget::container::Catalog + 'a,
+    Renderer: iced_core::renderer::Renderer + 'a,
+    <Theme as iced_widget::container::Catalog>::Class<'a>:
+        From<iced_widget::container::StyleFn<'a, Theme>>,
+{
+    scaffold::Scaffold::new(content)
 }

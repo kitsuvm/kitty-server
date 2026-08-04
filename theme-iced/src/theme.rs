@@ -8,7 +8,7 @@ use iced_core::{
 };
 use iced_widget::{button, container, text};
 
-use crate::widget::{application, window_background, window_button};
+use crate::widget::{application, scaffold, window_background, window_button};
 
 /// The name of the theme.
 pub const THEME_NAME: &str = "kitty";
@@ -216,5 +216,15 @@ impl window_button::Catalog for Theme {
 
     fn style(&self, class: &Self::Class<'_>, status: window_button::Status) -> button::Style {
         class(self, status)
+    }
+}
+
+impl scaffold::Catalog for Theme {
+    fn padding() -> Padding {
+        15.into()
+    }
+
+    fn spacing() -> iced_core::Pixels {
+        25.into()
     }
 }
