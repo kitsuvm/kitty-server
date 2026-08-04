@@ -26,6 +26,7 @@ kitty-server-common = { path = "common", version = "0.0.1-alpha.1" }
 kitty-server-runtime = { path = "runtime", version = "0.0.1-alpha.1" }
 kitty-theme-iced = { path = "theme-iced", version = "0.0.1-alpha.1" }
 iced = { version = "0.14.0", default-features = false }
+iced_anim = { version = "0.3.0", default-features = false }
 iced_core = { version = "0.14.0", default-features = false }
 iced_futures = { version = "0.14.0", default-features = false }
 iced_runtime = { version = "0.14.0", default-features = false }

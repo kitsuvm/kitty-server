@@ -1,10 +1,10 @@
 //! Graphical user interface for the Kitty Server.
 
-use iced::{Element, Padding, Renderer, Subscription, Task, widget::container};
+use iced::{Element, Padding, Renderer, Subscription, Task, widget::container, window::Settings};
 use kitty_theme_iced::{
     font::load_all,
     theme::Theme,
-    widget::{application::application_style, text, window},
+    widget::{animated::window, application::application_style, text},
     window_event,
 };
 
@@ -26,10 +26,14 @@ fn main() -> iced::Result {
     iced::application::<State, Message, Theme, Renderer>(boot, update, view)
         .title("Kitty Server")
         .theme(|_: &State| Theme::Dark)
-        .decorations(false)
-        .transparent(true)
         .style(application_style)
         .subscription(subscription)
+        .window(Settings {
+            min_size: Some((400, 300).into()),
+            decorations: false,
+            transparent: true,
+            ..Default::default()
+        })
         .run()
 }
 

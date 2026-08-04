@@ -207,7 +207,7 @@ impl window_button::Catalog for Theme {
                 background: match status.button_status {
                     button::Status::Pressed => Some(theme.palette().primary.into()),
                     button::Status::Hovered => Some(theme.palette().primary.into()),
-                    _ => None,
+                    _ => Some(Color::TRANSPARENT.into()),
                 },
                 ..Default::default()
             }

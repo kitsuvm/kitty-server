@@ -2,7 +2,7 @@ use iced_core::{Element, Length, theme::Base};
 use iced_widget::{Row, button, column, container, space, stack};
 
 use crate::{
-    widget::{icon, window_background, window_bar, window_button, window_resize},
+    widget::{animated, icon, window_background, window_bar, window_button, window_resize},
     window_event,
 };
 
@@ -22,6 +22,7 @@ impl WindowButtons {
     pub fn into_button<'a, Message, Theme, Renderer>(
         self,
         message: Option<Message>,
+        maximized: bool,
     ) -> window_button::WindowButton<'a, Message, Theme, Renderer>
     where
         Message: Clone + 'a,
@@ -37,9 +38,47 @@ impl WindowButtons {
     {
         let button = match self {
             WindowButtons::Minimize => window_button(icon(icon::MINIMIZE_ICON)),
-            WindowButtons::Maximize => window_button(icon(icon::MAXIMIZE_ICON)),
+            WindowButtons::Maximize => window_button(icon(match maximized {
+                true => icon::UNMAXIMIZE_ICON,
+                false => icon::MAXIMIZE_ICON,
+            })),
             WindowButtons::Close => {
                 window_button(icon(icon::CLOSE_ICON)).style(window_button::danger)
+            }
+        };
+
+        match message {
+            Some(msg) => button.on_press(msg),
+            None => button,
+        }
+    }
+
+    /// Converts the [`WindowButtons`] enum into a [`window_button::WindowButton`] widget with the given message.
+    pub fn into_animated_button<'a, Message, Theme, Renderer>(
+        self,
+        message: Option<Message>,
+        maximized: bool,
+    ) -> animated::window_button::WindowButton<'a, Message, Theme, Renderer>
+    where
+        Message: Clone + 'a,
+        Theme: Base
+            + window_button::Catalog
+            + iced_widget::button::Catalog
+            + iced_widget::text::Catalog
+            + 'a,
+        Renderer: iced_core::text::Renderer + 'a,
+        <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
+        <Theme as window_button::Catalog>::Class<'a>:
+            From<window_button::StyleFn<'a, Theme>> + Into<window_button::StyleFn<'a, Theme>>,
+    {
+        let button = match self {
+            WindowButtons::Minimize => animated::window_button(icon(icon::MINIMIZE_ICON)),
+            WindowButtons::Maximize => animated::window_button(icon(match maximized {
+                true => icon::UNMAXIMIZE_ICON,
+                false => icon::MAXIMIZE_ICON,
+            })),
+            WindowButtons::Close => {
+                animated::window_button(icon(icon::CLOSE_ICON)).style(window_button::danger)
             }
         };
 
@@ -181,18 +220,21 @@ where
                                 .on_event
                                 .as_ref()
                                 .map(|f| (f)(window_event::Event::Minimize)),
+                            window.window_state.map_or(false, |s| s.maximized),
                         ),
                         WindowButtons::Maximize => button.into_button(
                             window
                                 .on_event
                                 .as_ref()
                                 .map(|f| (f)(window_event::Event::Maximize)),
+                            window.window_state.map_or(false, |s| s.maximized),
                         ),
                         WindowButtons::Close => button.into_button(
                             window
                                 .on_event
                                 .as_ref()
                                 .map(|f| (f)(window_event::Event::Close)),
+                            window.window_state.map_or(false, |s| s.maximized),
                         ),
                     }
                     .no_rounded_corner(window.window_state.map_or(false, |s| s.maximized))

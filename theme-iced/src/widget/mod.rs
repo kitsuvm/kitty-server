@@ -4,6 +4,7 @@ use iced_core::Element;
 pub use icon::icon;
 pub use text::text;
 
+pub mod animated;
 pub mod application;
 pub mod icon;
 pub mod text;
