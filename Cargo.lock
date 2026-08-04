@@ -1277,8 +1277,10 @@ dependencies = [
 name = "kitty-theme-iced"
 version = "0.0.1-alpha.1"
 dependencies = [
- "iced",
  "iced_core",
+ "iced_futures",
+ "iced_runtime",
+ "iced_widget",
 ]
 
 [[package]]

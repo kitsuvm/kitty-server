@@ -1,9 +1,10 @@
 //! This module contains the fonts for the Kitty Theme.
 
-use iced::{
-    Font, Task,
-    font::{self, Family, Stretch, Style, Weight},
+use iced_core::{
+    Font,
+    font::{Family, Stretch, Style, Weight},
 };
+use iced_runtime::{Task, font};
 
 /// Lato Regular font bytes
 pub static LATO_REGULAR_BYTES: &[u8] = include_bytes!("./Lato-Regular.ttf");

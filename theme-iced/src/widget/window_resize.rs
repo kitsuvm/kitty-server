@@ -1,12 +1,7 @@
 //! This module contains a widget that creates a window resize handles with the given content and resize messages.
 
-use iced::{
-    Element, Length,
-    mouse::Interaction,
-    widget::{column, mouse_area, row, space},
-    window::Direction,
-};
-use iced_core::renderer;
+use iced_core::{Element, Length, mouse::Interaction, renderer, window::Direction};
+use iced_widget::{column, mouse_area, row, space};
 
 /// Changes how the window resize handles are displayed.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]

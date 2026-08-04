@@ -1,8 +1,5 @@
-use iced::{
-    Element, color,
-    theme::Base,
-    widget::{Button, button},
-};
+use iced_core::{Element, color, theme::Base};
+use iced_widget::{Button, button};
 
 /// The position of the window button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -128,8 +125,8 @@ where
     Message: Clone + 'a,
     Theme: Catalog + button::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as iced::widget::button::Catalog>::Class<'a>:
-        From<iced::widget::button::StyleFn<'a, Theme>>,
+    <Theme as iced_widget::button::Catalog>::Class<'a>:
+        From<iced_widget::button::StyleFn<'a, Theme>>,
 {
     fn from(window_button: WindowButton<'a, Message, Theme, Renderer>) -> Self {
         window_button

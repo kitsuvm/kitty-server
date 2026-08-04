@@ -1,12 +1,12 @@
 //! Kitty Theme for Iced.
 
-use iced::{
+use iced_core::{
     Border, Color, Padding,
     border::Radius,
     color,
     theme::{Base, Mode, Palette, Style},
-    widget::{button, container, text},
 };
+use iced_widget::{button, container, text};
 
 use crate::widget::{application, window_background, window_button};
 
@@ -85,14 +85,8 @@ impl Base for Theme {
     }
 }
 
-impl<State> iced::application::ThemeFn<State, Theme> for Theme {
-    fn theme(&self, _: &State) -> Option<Theme> {
-        Some(*self)
-    }
-}
-
-impl iced::widget::text::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme) -> iced::widget::text::Style>;
+impl iced_widget::text::Catalog for Theme {
+    type Class<'a> = Box<dyn Fn(&Theme) -> iced_widget::text::Style>;
 
     fn default<'a>() -> Self::Class<'a> {
         Box::new(|theme: &Theme| text::Style {
@@ -105,20 +99,20 @@ impl iced::widget::text::Catalog for Theme {
     }
 }
 
-impl iced::widget::container::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme) -> iced::widget::container::Style>;
+impl iced_widget::container::Catalog for Theme {
+    type Class<'a> = Box<dyn Fn(&Theme) -> iced_widget::container::Style>;
 
     fn default<'a>() -> Self::Class<'a> {
         Box::new(|theme: &Theme| {
             let palette = theme.palette();
-            iced::widget::container::Style {
+            iced_widget::container::Style {
                 background: Some(palette.background.into()),
                 ..Default::default()
             }
         })
     }
 
-    fn style(&self, item: &Self::Class<'_>) -> iced::widget::container::Style {
+    fn style(&self, item: &Self::Class<'_>) -> iced_widget::container::Style {
         item(self)
     }
 }
@@ -176,7 +170,7 @@ impl window_background::Catalog for Theme {
 }
 
 impl application::Catalog for Theme {
-    fn style(&self) -> iced::theme::Style {
+    fn style(&self) -> iced_core::theme::Style {
         let palette = self.palette();
 
         Style {

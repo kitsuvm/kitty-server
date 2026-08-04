@@ -1,9 +1,7 @@
 //! A window bar widget for the application.
 
-use iced::{
-    Element, Length,
-    widget::{container, mouse_area, row, space},
-};
+use iced_core::{Element, Length};
+use iced_widget::{container, mouse_area, row, space};
 
 pub struct WindowBar<'a, Message, Theme, Renderer>
 where
@@ -109,7 +107,7 @@ where
         .style(container::transparent);
 
         let center_slot = container(window_bar.content)
-            .center_x(Length::Fill)
+            .center_x(Length::Shrink)
             .center_y(window_bar.height)
             .style(container::transparent);
 
@@ -122,7 +120,7 @@ where
         let bar = mouse_area(row![
             left_slot.align_left(Length::Fill),
             center_slot,
-            right_slot.align_right(Length::Fill)
+            right_slot.align_right(Length::Fill),
         ]);
 
         match (window_bar.on_press, window_bar.on_double_click) {

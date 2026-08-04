@@ -1,11 +1,10 @@
 //! This module provides a simple interface for handling window events in an Iced application.
 
-use iced::{
-    Subscription, Task, exit,
-    window::{
-        Direction, Id, drag, drag_resize, is_maximized, latest, minimize, resize_events,
-        toggle_maximize,
-    },
+use iced_core::window::{Direction, Id};
+use iced_futures::Subscription;
+use iced_runtime::{
+    Task, exit,
+    window::{drag, drag_resize, is_maximized, latest, minimize, resize_events, toggle_maximize},
 };
 
 use crate::widget::{window_background, window_resize};

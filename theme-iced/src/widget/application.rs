@@ -1,6 +1,6 @@
 //! This module contains the style for the application background.
 
-use iced::theme::Style;
+use iced_core::theme::Style;
 
 pub trait Catalog {
     /// Returns the style for the application background.

@@ -12,5 +12,7 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-iced = { workspace = true }
 iced_core = { workspace = true }
+iced_futures = { workspace = true }
+iced_runtime = { workspace = true }
+iced_widget = { workspace = true }

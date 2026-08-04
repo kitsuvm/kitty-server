@@ -1,8 +1,7 @@
 //! A widget for displaying icons using the Material Symbols Filled Rounded Regular font.
 
-pub use iced::widget::text::{Catalog, Style, Text};
-use iced::{Font, widget};
-use iced_core::text::IntoFragment;
+use iced_core::{Font, text::IntoFragment};
+pub use iced_widget::text::{Catalog, Style, Text};
 
 use crate::font::MATERIAL_SYMBOLS_FILLED_ROUNDED_REGULAR_FONT;
 
@@ -13,7 +12,7 @@ where
     Renderer: iced_core::text::Renderer,
     <Renderer as iced_core::text::Renderer>::Font: From<Font>,
 {
-    widget::text(text).font(MATERIAL_SYMBOLS_FILLED_ROUNDED_REGULAR_FONT)
+    iced_widget::text(text).font(MATERIAL_SYMBOLS_FILLED_ROUNDED_REGULAR_FONT)
 }
 
 /// Minimize icon using Material Symbols.

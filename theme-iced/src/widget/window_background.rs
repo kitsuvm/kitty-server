@@ -1,7 +1,7 @@
 //! Container styles for windows.
 
-use iced::{Element, Length, Padding, widget::container};
-use iced_core::renderer;
+use iced_core::{Element, Length, Padding, renderer};
+use iced_widget::container;
 
 /// Represents the status of a window.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -90,8 +90,8 @@ where
     Message: Clone + 'a,
     Theme: Catalog + container::Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
-    <Theme as iced::widget::container::Catalog>::Class<'a>:
-        From<iced::widget::container::StyleFn<'a, Theme>>,
+    <Theme as iced_widget::container::Catalog>::Class<'a>:
+        From<iced_widget::container::StyleFn<'a, Theme>>,
 {
     fn from(window: WindowBackground<'a, Message, Theme, Renderer>) -> Self {
         let widget = container(window.content)
