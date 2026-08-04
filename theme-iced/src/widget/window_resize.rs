@@ -15,7 +15,7 @@ pub enum Handles {
     Clickable,
 }
 
-//// A widget that creates a window with the given content and resize messages.
+/// A widget that creates a window with the given content and resize messages.
 pub struct WindowResize<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,

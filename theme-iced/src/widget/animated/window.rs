@@ -71,7 +71,7 @@ impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
 
     /// Sets the state of the window.
     pub fn window_state(mut self, state: &window_event::State) -> Self {
-        self.window_state = Some(state.clone());
+        self.window_state = Some(*state);
         self
     }
 
@@ -138,24 +138,24 @@ where
                                 .on_event
                                 .as_ref()
                                 .map(|f| (f)(window_event::Event::Minimize)),
-                            window.window_state.map_or(false, |s| s.maximized),
+                            window.window_state.is_some_and(|s| s.maximized),
                         ),
                         WindowButtons::Maximize => button.into_animated_button(
                             window
                                 .on_event
                                 .as_ref()
                                 .map(|f| (f)(window_event::Event::Maximize)),
-                            window.window_state.map_or(false, |s| s.maximized),
+                            window.window_state.is_some_and(|s| s.maximized),
                         ),
                         WindowButtons::Close => button.into_animated_button(
                             window
                                 .on_event
                                 .as_ref()
                                 .map(|f| (f)(window_event::Event::Close)),
-                            window.window_state.map_or(false, |s| s.maximized),
+                            window.window_state.is_some_and(|s| s.maximized),
                         ),
                     }
-                    .no_rounded_corner(window.window_state.map_or(false, |s| s.maximized))
+                    .no_rounded_corner(window.window_state.is_some_and(|s| s.maximized))
                     .left_buttons(window.left_buttons)
                     .position(match i {
                         0 => window_button::Position::Left,

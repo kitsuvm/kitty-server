@@ -34,7 +34,7 @@ pub trait Catalog {
     fn default<'a>() -> Self::Class<'a>;
 
     /// Returns the style of the window button based on its class and status.
-    fn style<'a>(&self, class: &Self::Class<'_>, status: Status) -> button::Style;
+    fn style(&self, class: &Self::Class<'_>, status: Status) -> button::Style;
 }
 
 /// A type alias for a style function that takes a theme and a status and returns a button style.
