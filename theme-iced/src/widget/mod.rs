@@ -6,7 +6,7 @@ pub use text::text;
 
 pub mod application;
 pub mod icon;
-pub mod scaffold;
+pub mod sidebar;
 pub mod text;
 pub mod window;
 pub mod window_background;
@@ -86,16 +86,16 @@ where
     window::Window::new(content)
 }
 
-/// Creates a new [`Scaffold`] widget with the given content.
-pub fn scaffold<'a, Message, Theme, Renderer>(
+/// Creates a new [`sidebar`] widget with the given content.
+pub fn sidebar<'a, Message, Theme, Renderer>(
     content: impl Into<Element<'a, Message, Theme, Renderer>>,
-) -> scaffold::Scaffold<'a, Message, Theme, Renderer>
+) -> sidebar::Sidebar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: scaffold::Catalog + iced_widget::container::Catalog + 'a,
+    Theme: sidebar::Catalog + iced_widget::container::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
     <Theme as iced_widget::container::Catalog>::Class<'a>:
         From<iced_widget::container::StyleFn<'a, Theme>>,
 {
-    scaffold::Scaffold::new(content)
+    sidebar::Sidebar::new(content)
 }

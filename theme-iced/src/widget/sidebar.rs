@@ -1,9 +1,9 @@
-//! A scaffold widget.
+//! A sidebar widget that can be used to create a layout with a sidebar and content.
 
 use iced_core::{Element, Length, Padding, Pixels, renderer};
 use iced_widget::{column, container, row};
 
-/// A catalog of styles for the [`Scaffold`] widget.
+/// A catalog of styles for the [`Sidebar`] widget.
 pub trait Catalog {
     /// Returns the padding of the scaffold.
     fn padding() -> Padding;
@@ -11,8 +11,8 @@ pub trait Catalog {
     fn spacing() -> Pixels;
 }
 
-/// A scaffold widget that can be used to create a layout with a sidebar and content.
-pub struct Scaffold<'a, Message, Theme, Renderer>
+/// A sidebar widget that can be used to create a layout with a sidebar and content.
+pub struct Sidebar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + container::Catalog + 'a,
@@ -30,17 +30,15 @@ where
     spacing: Pixels,
 }
 
-impl<'a, Message, Theme, Renderer> Scaffold<'a, Message, Theme, Renderer>
+impl<'a, Message, Theme, Renderer> Sidebar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + container::Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
 {
     /// Creates a new [`Scaffold`] widget with the given content.
-    pub fn new(
-        content: impl Into<Element<'a, Message, Theme, Renderer>>,
-    ) -> Scaffold<'a, Message, Theme, Renderer> {
-        Scaffold {
+    pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
+        Self {
             content: content.into(),
             padding: Theme::padding(),
             sidebar: None,
@@ -50,10 +48,7 @@ where
     }
 
     /// Sets the optional sidebar of the scaffold.
-    pub fn sidebar(
-        mut self,
-        sidebar: impl Into<Element<'a, Message, Theme, Renderer>>,
-    ) -> Scaffold<'a, Message, Theme, Renderer> {
+    pub fn sidebar(mut self, sidebar: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
         self.sidebar = Some(sidebar.into());
         self
     }
@@ -62,28 +57,25 @@ where
     pub fn bottom_sidebar(
         mut self,
         bottom_sidebar: impl Into<Element<'a, Message, Theme, Renderer>>,
-    ) -> Scaffold<'a, Message, Theme, Renderer> {
+    ) -> Self {
         self.bottom_sidebar = Some(bottom_sidebar.into());
         self
     }
 
     /// Sets the padding of the scaffold.
-    pub fn padding(
-        mut self,
-        padding: impl Into<Padding>,
-    ) -> Scaffold<'a, Message, Theme, Renderer> {
+    pub fn padding(mut self, padding: impl Into<Padding>) -> Self {
         self.padding = padding.into();
         self
     }
 
     /// Sets the spacing between the content and the sidebar of the scaffold.
-    pub fn spacing(mut self, spacing: impl Into<Pixels>) -> Scaffold<'a, Message, Theme, Renderer> {
+    pub fn spacing(mut self, spacing: impl Into<Pixels>) -> Self {
         self.spacing = spacing.into();
         self
     }
 }
 
-impl<'a, Message, Theme, Renderer> From<Scaffold<'a, Message, Theme, Renderer>>
+impl<'a, Message, Theme, Renderer> From<Sidebar<'a, Message, Theme, Renderer>>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
@@ -91,7 +83,7 @@ where
     Renderer: renderer::Renderer + 'a,
     <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
-    fn from(scaffold: Scaffold<'a, Message, Theme, Renderer>) -> Self {
+    fn from(scaffold: Sidebar<'a, Message, Theme, Renderer>) -> Self {
         row![
             match (scaffold.sidebar, scaffold.bottom_sidebar) {
                 (Some(sidebar), Some(bottom_sidebar)) => Some(Element::from(column![
