@@ -144,8 +144,8 @@ where
     }
 
     /// Sets the state of the window.
-    pub fn window_state(mut self, state: &window_event::State) -> Self {
-        self.window_state = Some(*state);
+    pub fn window_state(mut self, state: window_event::State) -> Self {
+        self.window_state = Some(state);
         self
     }
 
