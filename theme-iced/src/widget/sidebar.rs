@@ -17,6 +17,7 @@ where
     Message: Clone + 'a,
     Theme: Catalog + container::Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
+    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     /// The content of the scaffold.
     content: Element<'a, Message, Theme, Renderer>,
@@ -35,6 +36,7 @@ where
     Message: Clone + 'a,
     Theme: Catalog + container::Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
+    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     /// Creates a new [`Scaffold`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {

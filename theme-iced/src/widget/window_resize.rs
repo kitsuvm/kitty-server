@@ -153,7 +153,7 @@ fn create_handle<'a, Message, Theme, Renderer>(
     message: Option<Message>,
 ) -> Element<'a, Message, Theme, Renderer>
 where
-    Message: 'a + Clone,
+    Message: Clone + 'a,
     Theme: 'a,
     Renderer: renderer::Renderer + 'a,
 {

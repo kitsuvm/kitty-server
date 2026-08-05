@@ -1,6 +1,6 @@
 //! Custom window button widget.
 
-use iced_core::{Element, color, theme::Base};
+use iced_core::{Element, color, renderer, theme::Base};
 use iced_widget::button;
 
 /// The position of the window button.
@@ -47,7 +47,8 @@ pub struct WindowButton<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + button::Catalog + 'a,
-    Renderer: iced_core::renderer::Renderer + 'a,
+    Renderer: renderer::Renderer + 'a,
+    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
 {
     /// The content of the button.
     content: Element<'a, Message, Theme, Renderer>,
@@ -69,7 +70,8 @@ impl<'a, Message, Theme, Renderer> WindowButton<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + button::Catalog + 'a,
-    Renderer: iced_core::renderer::Renderer + 'a,
+    Renderer: renderer::Renderer + 'a,
+    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
 {
     /// Creates a new [`WindowButton`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
@@ -135,9 +137,8 @@ impl<'a, Message, Theme, Renderer> From<WindowButton<'a, Message, Theme, Rendere
 where
     Message: Clone + 'a,
     Theme: Catalog + button::Catalog + 'a,
-    Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as iced_widget::button::Catalog>::Class<'a>:
-        From<iced_widget::button::StyleFn<'a, Theme>>,
+    Renderer: renderer::Renderer + 'a,
+    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
 {
     fn from(window_button: WindowButton<'a, Message, Theme, Renderer>) -> Self {
         match window_button.animated {

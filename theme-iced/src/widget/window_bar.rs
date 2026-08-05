@@ -1,13 +1,14 @@
 //! A window bar widget for the application.
 
-use iced_core::{Element, Length, alignment::Horizontal};
+use iced_core::{Element, Length, alignment::Horizontal, renderer};
 use iced_widget::{container, mouse_area, row, space};
 
 pub struct WindowBar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: 'a,
-    Renderer: iced_core::renderer::Renderer + 'a,
+    Theme: container::Catalog + 'a,
+    Renderer: renderer::Renderer + 'a,
+    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     /// The content of the window bar.
     content: Element<'a, Message, Theme, Renderer>,
@@ -32,8 +33,9 @@ where
 impl<'a, Message, Theme, Renderer> WindowBar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: 'a,
+    Theme: container::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
+    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     /// Creates a new [`WindowBar`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {

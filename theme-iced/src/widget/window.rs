@@ -37,6 +37,7 @@ impl WindowButtons {
         Renderer: iced_core::text::Renderer + 'a,
         <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
         <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
+        <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
     {
         let button = match self {
             WindowButtons::Minimize => window_button(icon(icon::MINIMIZE_ICON)),
@@ -69,7 +70,22 @@ impl From<WindowButtons> for window_event::Event {
 }
 
 /// A window widget that can be used to create a custom window with a title bar and buttons.
-pub struct Window<'a, Message, Theme, Renderer> {
+pub struct Window<'a, Message, Theme, Renderer>
+where
+    Message: Clone + 'a,
+    Theme: Base
+        + window_background::Catalog
+        + window_button::Catalog
+        + iced_widget::button::Catalog
+        + iced_widget::container::Catalog
+        + iced_widget::text::Catalog
+        + 'a,
+    Renderer: iced_core::text::Renderer + 'a,
+    <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
+    <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
+    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
+    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
+{
     /// The content of the window.
     content: Element<'a, Message, Theme, Renderer>,
     /// The state of the window.
@@ -94,7 +110,22 @@ pub struct Window<'a, Message, Theme, Renderer> {
     animated: bool,
 }
 
-impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
+impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer>
+where
+    Message: Clone + 'a,
+    Theme: Base
+        + window_background::Catalog
+        + window_button::Catalog
+        + iced_widget::button::Catalog
+        + iced_widget::container::Catalog
+        + iced_widget::text::Catalog
+        + 'a,
+    Renderer: iced_core::text::Renderer + 'a,
+    <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
+    <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
+    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
+    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
+{
     /// Creates a new [`Window`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
         Self {

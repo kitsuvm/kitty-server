@@ -4,7 +4,7 @@ use iced::{Element, Renderer, Subscription, Task, window::Settings};
 use kitty_theme_iced::{
     font::load_all,
     theme::Theme,
-    widget::{application::application_style, scaffold, text, window},
+    widget::{application::application_style, text, window},
     window_event,
 };
 
@@ -58,15 +58,11 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 
 /// Renders the view of the application.
 fn view(state: &State) -> Element<'_, Message, Theme, Renderer> {
-    window(
-        scaffold(text("Hello Kitty!"))
-            .sidebar(text("Sidebar").size(14).center())
-            .bottom_sidebar(text("Sidebar").size(14).center()),
-    )
-    .on_event(Message::Window)
-    .window_state(&state.window_state)
-    .window_bar_center(text("Kitty Server").size(14).center())
-    .into()
+    window(text("Hello Kitty!"))
+        .on_event(Message::Window)
+        .window_state(&state.window_state)
+        .window_bar_center(text("Kitty Server").size(14).center())
+        .into()
 }
 
 /// Subscribes to window resize events.
