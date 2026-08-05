@@ -1,5 +1,7 @@
+//! Custom window button widget.
+
 use iced_core::{Element, color, theme::Base};
-use iced_widget::{Button, button};
+use iced_widget::button;
 
 /// The position of the window button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,16 +49,20 @@ where
     Theme: Catalog + button::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
 {
-    /// The button widget.
-    button_content: Button<'a, Message, Theme, Renderer>,
+    /// The content of the button.
+    content: Element<'a, Message, Theme, Renderer>,
     /// The position of the button.
     position: Position,
     /// If the window buttons are aligned to the left or right of the window.
     left_buttons: bool,
+    /// The message to send when the button is pressed.
+    on_press: Option<Message>,
     /// The style function for the button.
     class: <Theme as Catalog>::Class<'a>,
     /// If the button should have no rounded corners.
     no_rounded_corner: bool,
+    /// If the button should be animated.
+    animated: bool,
 }
 
 impl<'a, Message, Theme, Renderer> WindowButton<'a, Message, Theme, Renderer>
@@ -66,22 +72,21 @@ where
     Renderer: iced_core::renderer::Renderer + 'a,
 {
     /// Creates a new [`WindowButton`] widget with the given content.
-    pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self
-    where
-        <Theme as Catalog>::Class<'a>: Into<StyleFn<'a, Theme>>,
-    {
+    pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
         Self {
-            button_content: button(content),
+            content: content.into(),
             position: Position::Center,
             left_buttons: false,
             class: <Theme as Catalog>::default(),
             no_rounded_corner: false,
+            animated: false,
+            on_press: None,
         }
     }
 
     /// Sets the message to send when the button is pressed.
     pub fn on_press(mut self, message: Message) -> Self {
-        self.button_content = self.button_content.on_press(message);
+        self.on_press = Some(message);
         self
     }
 
@@ -117,6 +122,12 @@ where
         self.no_rounded_corner = no_rounded_corner;
         self
     }
+
+    /// Sets whether the button should be animated.
+    pub fn animated(mut self, animated: bool) -> Self {
+        self.animated = animated;
+        self
+    }
 }
 
 impl<'a, Message, Theme, Renderer> From<WindowButton<'a, Message, Theme, Renderer>>
@@ -129,21 +140,52 @@ where
         From<iced_widget::button::StyleFn<'a, Theme>>,
 {
     fn from(window_button: WindowButton<'a, Message, Theme, Renderer>) -> Self {
-        window_button
-            .button_content
-            .style(move |theme: &Theme, status: button::Status| {
-                <Theme as Catalog>::style(
-                    theme,
-                    &window_button.class,
-                    Status {
-                        button_status: status,
-                        button_position: window_button.position,
-                        left_buttons: window_button.left_buttons,
-                        no_rounded_corner: window_button.no_rounded_corner,
+        match window_button.animated {
+            true => {
+                let mut button = iced_anim::widget::button(window_button.content).style(
+                    move |theme: &Theme, status: button::Status| {
+                        <Theme as Catalog>::style(
+                            theme,
+                            &window_button.class,
+                            Status {
+                                button_status: status,
+                                button_position: window_button.position,
+                                left_buttons: window_button.left_buttons,
+                                no_rounded_corner: window_button.no_rounded_corner,
+                            },
+                        )
                     },
-                )
-            })
-            .into()
+                );
+
+                if let Some(message) = window_button.on_press {
+                    button = button.on_press(message);
+                }
+
+                button.into()
+            }
+            false => {
+                let mut button = button(window_button.content).style(
+                    move |theme: &Theme, status: button::Status| {
+                        <Theme as Catalog>::style(
+                            theme,
+                            &window_button.class,
+                            Status {
+                                button_status: status,
+                                button_position: window_button.position,
+                                left_buttons: window_button.left_buttons,
+                                no_rounded_corner: window_button.no_rounded_corner,
+                            },
+                        )
+                    },
+                );
+
+                if let Some(message) = window_button.on_press {
+                    button = button.on_press(message);
+                }
+
+                button.into()
+            }
+        }
     }
 }
 

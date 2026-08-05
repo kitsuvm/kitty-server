@@ -4,7 +4,7 @@ use iced::{Element, Renderer, Subscription, Task, window::Settings};
 use kitty_theme_iced::{
     font::load_all,
     theme::Theme,
-    widget::{animated::window, application::application_style, scaffold, text},
+    widget::{application::application_style, scaffold, text, window},
     window_event,
 };
 
@@ -65,7 +65,7 @@ fn view(state: &State) -> Element<'_, Message, Theme, Renderer> {
     )
     .on_event(Message::Window)
     .window_state(&state.window_state)
-    .window_title(text("Kitty Server").size(14).center())
+    .window_bar_center(text("Kitty Server").size(14).center())
     .into()
 }
 

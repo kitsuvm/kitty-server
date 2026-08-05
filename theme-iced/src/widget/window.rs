@@ -1,8 +1,10 @@
+//! A window widget that can be used to create a custom window with a title bar and buttons.
+
 use iced_core::{Element, Length, theme::Base};
 use iced_widget::{Row, button, column, container, space, stack};
 
 use crate::{
-    widget::{animated, icon, window_background, window_bar, window_button, window_resize},
+    widget::{icon, window_background, window_bar, window_button, window_resize},
     window_event,
 };
 
@@ -23,6 +25,7 @@ impl WindowButtons {
         self,
         message: Option<Message>,
         maximized: bool,
+        animated: bool,
     ) -> window_button::WindowButton<'a, Message, Theme, Renderer>
     where
         Message: Clone + 'a,
@@ -33,8 +36,7 @@ impl WindowButtons {
             + 'a,
         Renderer: iced_core::text::Renderer + 'a,
         <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
-        <Theme as window_button::Catalog>::Class<'a>:
-            From<window_button::StyleFn<'a, Theme>> + Into<window_button::StyleFn<'a, Theme>>,
+        <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
     {
         let button = match self {
             WindowButtons::Minimize => window_button(icon(icon::MINIMIZE_ICON)),
@@ -45,46 +47,23 @@ impl WindowButtons {
             WindowButtons::Close => {
                 window_button(icon(icon::CLOSE_ICON)).style(window_button::danger)
             }
-        };
+        }
+        .no_rounded_corner(maximized)
+        .animated(animated);
 
         match message {
             Some(msg) => button.on_press(msg),
             None => button,
         }
     }
+}
 
-    /// Converts the [`WindowButtons`] enum into a [`window_button::WindowButton`] widget with the given message.
-    pub fn into_animated_button<'a, Message, Theme, Renderer>(
-        self,
-        message: Option<Message>,
-        maximized: bool,
-    ) -> animated::window_button::WindowButton<'a, Message, Theme, Renderer>
-    where
-        Message: Clone + 'a,
-        Theme: Base
-            + window_button::Catalog
-            + iced_widget::button::Catalog
-            + iced_widget::text::Catalog
-            + 'a,
-        Renderer: iced_core::text::Renderer + 'a,
-        <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
-        <Theme as window_button::Catalog>::Class<'a>:
-            From<window_button::StyleFn<'a, Theme>> + Into<window_button::StyleFn<'a, Theme>>,
-    {
-        let button = match self {
-            WindowButtons::Minimize => animated::window_button(icon(icon::MINIMIZE_ICON)),
-            WindowButtons::Maximize => animated::window_button(icon(match maximized {
-                true => icon::UNMAXIMIZE_ICON,
-                false => icon::MAXIMIZE_ICON,
-            })),
-            WindowButtons::Close => {
-                animated::window_button(icon(icon::CLOSE_ICON)).style(window_button::danger)
-            }
-        };
-
-        match message {
-            Some(msg) => button.on_press(msg),
-            None => button,
+impl From<WindowButtons> for window_event::Event {
+    fn from(button: WindowButtons) -> Self {
+        match button {
+            WindowButtons::Minimize => window_event::Event::Minimize,
+            WindowButtons::Maximize => window_event::Event::Maximize,
+            WindowButtons::Close => window_event::Event::Close,
         }
     }
 }
@@ -93,20 +72,26 @@ impl WindowButtons {
 pub struct Window<'a, Message, Theme, Renderer> {
     /// The content of the window.
     content: Element<'a, Message, Theme, Renderer>,
-    /// The title of the window.
-    window_title: Option<Element<'a, Message, Theme, Renderer>>,
-    /// The extra content of the window.
-    window_extra: Option<Element<'a, Message, Theme, Renderer>>,
-    /// The buttons of the window.
-    window_buttons: Option<Vec<WindowButtons>>,
-    /// The extra content for the side of the window buttons.
-    window_extra_buttons: Option<Element<'a, Message, Theme, Renderer>>,
     /// The state of the window.
     window_state: Option<window_event::State>,
     /// The function to call when the window is resized.
     on_event: Option<Box<dyn Fn(window_event::Event) -> Message + 'a>>,
+    /// The centered content of the window bar.
+    window_bar_center: Option<Element<'a, Message, Theme, Renderer>>,
+    /// The buttons of the window bar.
+    window_bar_buttons: Option<Vec<WindowButtons>>,
+    /// The content for opposite side of the window buttons in the window bar.
+    window_bar_opposite: Option<Element<'a, Message, Theme, Renderer>>,
+    /// The extra content for the side of the window buttons.
+    window_bar_extra: Option<Element<'a, Message, Theme, Renderer>>,
     /// Whether the buttons are on the left side of the window.
-    left_buttons: bool,
+    window_bar_left_buttons: bool,
+    /// Whether the window bar content is centered.
+    window_bar_centered: bool,
+    /// The width of the side content of the window bar.
+    window_bar_side_width: Option<Length>,
+    /// Whether the window bar buttons are animated.
+    animated: bool,
 }
 
 impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
@@ -114,41 +99,17 @@ impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
         Self {
             content: content.into(),
-            window_title: None,
-            window_extra: None,
-            window_buttons: None,
             window_state: None,
-            window_extra_buttons: None,
             on_event: None,
-            left_buttons: false,
+            window_bar_center: None,
+            window_bar_buttons: None,
+            window_bar_opposite: None,
+            window_bar_extra: None,
+            window_bar_left_buttons: false,
+            window_bar_centered: true,
+            window_bar_side_width: None,
+            animated: false,
         }
-    }
-
-    /// Sets the title of the window.
-    pub fn window_title(mut self, title: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
-        self.window_title = Some(title.into());
-        self
-    }
-
-    /// Sets the extra content of the window.
-    pub fn window_extra(mut self, extra: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
-        self.window_extra = Some(extra.into());
-        self
-    }
-
-    /// Sets the buttons of the window.
-    pub fn window_buttons(mut self, buttons: Vec<WindowButtons>) -> Self {
-        self.window_buttons = Some(buttons);
-        self
-    }
-
-    /// Sets the extra content for the side of the window buttons.
-    pub fn window_extra_buttons(
-        mut self,
-        extra: impl Into<Element<'a, Message, Theme, Renderer>>,
-    ) -> Self {
-        self.window_extra_buttons = Some(extra.into());
-        self
     }
 
     /// Sets the state of the window.
@@ -163,9 +124,60 @@ impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer> {
         self
     }
 
+    /// Sets the centered content of the window bar.
+    pub fn window_bar_center(
+        mut self,
+        content: impl Into<Element<'a, Message, Theme, Renderer>>,
+    ) -> Self {
+        self.window_bar_center = Some(content.into());
+        self
+    }
+
+    /// Sets the buttons of the window bar.
+    pub fn window_bar_buttons(mut self, buttons: Vec<WindowButtons>) -> Self {
+        self.window_bar_buttons = Some(buttons);
+        self
+    }
+
+    /// Sets the content for opposite side of the window buttons in the window bar.
+    pub fn window_bar_opposite(
+        mut self,
+        content: impl Into<Element<'a, Message, Theme, Renderer>>,
+    ) -> Self {
+        self.window_bar_opposite = Some(content.into());
+        self
+    }
+
+    /// Sets the extra content for the side of the window buttons.
+    pub fn window_bar_extra(
+        mut self,
+        content: impl Into<Element<'a, Message, Theme, Renderer>>,
+    ) -> Self {
+        self.window_bar_extra = Some(content.into());
+        self
+    }
+
     /// Sets whether the buttons are on the left side of the window.
-    pub fn left_buttons(mut self, left: bool) -> Self {
-        self.left_buttons = left;
+    pub fn window_bar_left_buttons(mut self, left_buttons: bool) -> Self {
+        self.window_bar_left_buttons = left_buttons;
+        self
+    }
+
+    /// Sets whether the window bar content is centered.
+    pub fn window_bar_centered(mut self, centered: bool) -> Self {
+        self.window_bar_centered = centered;
+        self
+    }
+
+    /// Sets the width of the side content of the window bar.
+    pub fn window_bar_side_width(mut self, side_width: Length) -> Self {
+        self.window_bar_side_width = Some(side_width);
+        self
+    }
+
+    /// Sets whether the window bar buttons are animated.
+    pub fn animated(mut self, animated: bool) -> Self {
+        self.animated = animated;
         self
     }
 }
@@ -183,18 +195,15 @@ where
         + 'a,
     Renderer: iced_core::text::Renderer + 'a,
     <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
-    <Theme as window_background::Catalog>::Class<'a>: Into<window_background::StyleFn<'a, Theme>>,
-    <Theme as window_button::Catalog>::Class<'a>:
-        From<window_button::StyleFn<'a, Theme>> + Into<window_button::StyleFn<'a, Theme>>,
-    <Theme as iced_widget::container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
-    <Theme as iced_widget::button::Catalog>::Class<'a>:
-        From<button::StyleFn<'a, Theme>> + Into<button::StyleFn<'a, Theme>>,
+    <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
+    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
+    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     fn from(window: Window<'a, Message, Theme, Renderer>) -> Self {
-        let expected_window_buttons =
+        let raw_window_bar_buttons =
             window
-                .window_buttons
-                .unwrap_or_else(|| match window.left_buttons {
+                .window_bar_buttons
+                .unwrap_or_else(|| match window.window_bar_left_buttons {
                     true => vec![
                         WindowButtons::Close,
                         WindowButtons::Minimize,
@@ -207,56 +216,47 @@ where
                     ],
                 });
 
-        let last_window_button_index = expected_window_buttons.len().saturating_sub(1);
+        let last_window_bar_button_index = raw_window_bar_buttons.len().saturating_sub(1);
 
-        let mut window_buttons = expected_window_buttons
+        let mut window_bar_buttons = raw_window_bar_buttons
             .into_iter()
             .enumerate()
-            .map(|(i, button)| {
+            .map(|(i, raw_button)| {
+                let message = window.on_event.as_ref().map(|f| (f)(raw_button.into()));
+
                 Element::from(
-                    match button {
-                        WindowButtons::Minimize => button.into_button(
-                            window
-                                .on_event
-                                .as_ref()
-                                .map(|f| (f)(window_event::Event::Minimize)),
+                    raw_button
+                        .into_button(
+                            message,
                             window.window_state.is_some_and(|s| s.maximized),
-                        ),
-                        WindowButtons::Maximize => button.into_button(
-                            window
-                                .on_event
-                                .as_ref()
-                                .map(|f| (f)(window_event::Event::Maximize)),
-                            window.window_state.is_some_and(|s| s.maximized),
-                        ),
-                        WindowButtons::Close => button.into_button(
-                            window
-                                .on_event
-                                .as_ref()
-                                .map(|f| (f)(window_event::Event::Close)),
-                            window.window_state.is_some_and(|s| s.maximized),
-                        ),
-                    }
-                    .no_rounded_corner(window.window_state.is_some_and(|s| s.maximized))
-                    .left_buttons(window.left_buttons)
-                    .position(match i {
-                        0 => window_button::Position::Left,
-                        i if i == last_window_button_index => window_button::Position::Right,
-                        _ => window_button::Position::Center,
-                    }),
+                            window.animated,
+                        )
+                        .left_buttons(window.window_bar_left_buttons)
+                        .position(match i {
+                            0 => window_button::Position::Left,
+                            i if i == last_window_bar_button_index => {
+                                window_button::Position::Right
+                            }
+                            _ => window_button::Position::Center,
+                        }),
                 )
             })
             .collect::<Vec<_>>();
 
-        match (window.window_extra_buttons, window.left_buttons) {
-            (Some(extra), false) => window_buttons.insert(0, extra),
-            (Some(extra), true) => window_buttons.push(extra),
+        match (window.window_bar_extra, window.window_bar_left_buttons) {
+            (Some(content), false) => window_bar_buttons.insert(0, content),
+            (Some(content), true) => window_bar_buttons.push(content),
             _ => {}
         };
 
-        let mut window_bar = window_bar(window.window_title.unwrap_or(space().into()))
-            .buttons(Row::with_children(window_buttons))
-            .left_buttons(window.left_buttons);
+        let mut window_bar = window_bar(window.window_bar_center.unwrap_or(space().into()))
+            .buttons(Row::with_children(window_bar_buttons))
+            .left_buttons(window.window_bar_left_buttons)
+            .centered(window.window_bar_centered);
+
+        if let Some(side_width) = window.window_bar_side_width {
+            window_bar = window_bar.side_width(side_width);
+        }
 
         if let Some(ref on_event) = window.on_event {
             window_bar = window_bar
@@ -264,8 +264,8 @@ where
                 .on_double_click(on_event(window_event::Event::Maximize));
         }
 
-        if let Some(window_extra) = window.window_extra {
-            window_bar = window_bar.extra(window_extra);
+        if let Some(window_opposite) = window.window_bar_opposite {
+            window_bar = window_bar.opposite(window_opposite);
         }
 
         let mut window_content = window_background(column![window_bar, window.content]);
