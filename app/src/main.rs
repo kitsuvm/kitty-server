@@ -4,9 +4,13 @@ use iced::{Element, Renderer, Subscription, Task, window::Settings};
 use kitty_theme_iced::{
     font::load_all,
     theme::Theme,
-    widget::{application::application_style, text, window},
+    widget::{application::application_style, window},
     window_event,
 };
+
+use crate::screen::server_list;
+
+mod screen;
 
 /// The state of the application.
 struct State {
@@ -55,13 +59,14 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
         }
     }
 }
-
+ 
 /// Renders the view of the application.
 fn view(state: &State) -> Element<'_, Message, Theme, Renderer> {
-    window(text("Hello Kitty!"))
+    window(server_list::main())
         .on_event(Message::Window)
-        .window_state(&state.window_state)
-        .window_bar_center(text("Kitty Server").size(14).center())
+        .window_state(state.window_state)
+        .window_bar_opposite(server_list::window_bar_opposite())
+        .window_bar_center(server_list::window_bar_center())
         .into()
 }
 

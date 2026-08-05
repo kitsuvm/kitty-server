@@ -6,7 +6,7 @@ use iced_core::{
     color,
     theme::{Base, Mode, Palette, Style},
 };
-use iced_widget::{button, container, text};
+use iced_widget::{button, container, text, text_input};
 
 use crate::widget::{application, sidebar, window_background, window_button};
 
@@ -226,5 +226,24 @@ impl sidebar::Catalog for Theme {
 
     fn spacing() -> iced_core::Pixels {
         25.into()
+    }
+}
+
+impl text_input::Catalog for Theme {
+    type Class<'a> = Box<dyn Fn(&Theme, text_input::Status) -> text_input::Style>;
+
+    fn default<'a>() -> Self::Class<'a> {
+        Box::new(|_: &Theme, _: text_input::Status| text_input::Style {
+            background: Color::TRANSPARENT.into(),
+            border: Border::default(),
+            icon: Color::WHITE.into(),
+            placeholder: Color::WHITE.into(),
+            selection: Color::WHITE.into(),
+            value: Color::WHITE.into(),
+        })
+    }
+
+    fn style(&self, class: &Self::Class<'_>, status: text_input::Status) -> text_input::Style {
+        class(self, status)
     }
 }
