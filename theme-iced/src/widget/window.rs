@@ -1,7 +1,7 @@
 //! A window widget that can be used to create a custom window with a title bar and buttons.
 
-use iced_core::{Element, Length, theme::Base};
-use iced_widget::{Row, button, column, space, stack};
+use iced_core::{Element, Length, Pixels, theme::Base};
+use iced_widget::{Row, button, column, container, space, stack};
 
 use crate::{
     widget::{
@@ -10,6 +10,7 @@ use crate::{
     window_event,
 };
 
+/// A catalog of styles for the window widget.
 pub trait Catalog:
     window_background::Catalog
     + window_button::Catalog
@@ -17,9 +18,15 @@ pub trait Catalog:
     + window_bar::Catalog
     + Base
 {
+    /// Converts a style function into a class for the window button.
     fn into_button_class<'a>(
         style: impl Fn(&Self, window_button::Status, button::Status) -> button::Style + 'a,
     ) -> <Self as window_button::Catalog>::SuperClass<'a>;
+
+    /// Converts a style function into a class for the container.
+    fn into_container_class<'a>(
+        style: impl Fn(&Self) -> container::Style + 'a,
+    ) -> <Self as container::Catalog>::Class<'a>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,6 +45,7 @@ impl WindowButtons {
     pub fn into_button<'a, Message, Theme, Renderer>(
         self,
         message: Option<Message>,
+        icon_size: Option<Pixels>,
         maximized: bool,
         animated: bool,
     ) -> window_button::WindowButton<'a, Message, Theme, Renderer>
@@ -46,17 +54,30 @@ impl WindowButtons {
         Theme: Catalog + 'a,
         Renderer: TextRenderer + 'a,
     {
-        let button = match self {
-            WindowButtons::Minimize => window_button(icon(icon::MINIMIZE_ICON)),
-            WindowButtons::Maximize => window_button(icon(match maximized {
+        let mut icon = icon(match self {
+            Self::Minimize => icon::MINIMIZE_ICON,
+            Self::Maximize => match maximized {
                 true => icon::UNMAXIMIZE_ICON,
                 false => icon::MAXIMIZE_ICON,
-            })),
-            WindowButtons::Close => window_button(icon(icon::CLOSE_ICON))
-                .class(Theme::into_button_class(window_button::danger)),
+            },
+            Self::Close => icon::CLOSE_ICON,
+        });
+
+        if let Some(size) = icon_size {
+            icon = icon.size(size);
         }
+
+        let mut button = window_button(
+            container(icon)
+                .center(Length::Fill)
+                .class(Theme::into_container_class(container::transparent)),
+        )
         .no_rounded_corner(maximized)
         .animated(animated);
+
+        if self == Self::Close {
+            button = button.class(Theme::into_button_class(window_button::danger))
+        }
 
         match message {
             Some(msg) => button.on_press(msg),
@@ -104,6 +125,8 @@ where
     window_bar_side_width: Option<Length>,
     /// Whether the window bar buttons are animated.
     animated: bool,
+    /// The size of the icons in the window bar buttons.
+    icon_size: Option<Pixels>,
 }
 
 impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer>
@@ -126,6 +149,7 @@ where
             window_bar_centered: true,
             window_bar_side_width: None,
             animated: false,
+            icon_size: None,
         }
     }
 
@@ -197,6 +221,12 @@ where
         self.animated = animated;
         self
     }
+
+    /// Sets the size of the icons in the window bar buttons.
+    pub fn icon_size(mut self, size: impl Into<Pixels>) -> Self {
+        self.icon_size = Some(size.into());
+        self
+    }
 }
 
 impl<'a, Message, Theme, Renderer> From<Window<'a, Message, Theme, Renderer>>
@@ -235,6 +265,7 @@ where
                     raw_button
                         .into_button(
                             message,
+                            window.icon_size,
                             window.window_state.is_some_and(|s| s.maximized),
                             window.animated,
                         )

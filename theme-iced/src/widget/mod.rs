@@ -93,7 +93,7 @@ pub fn content<'a, Message, Theme, Renderer>(
 ) -> content::Content<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: iced_widget::container::Catalog + 'a,
+    Theme: content::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
 {
     content::Content::new(content)

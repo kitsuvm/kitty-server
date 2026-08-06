@@ -1,6 +1,6 @@
 //! Custom window button widget.
 
-use iced_core::{Element, color, renderer, theme::Base};
+use iced_core::{Element, Length, color, renderer, theme::Base};
 use iced_widget::button;
 
 /// The position of the window button.
@@ -67,6 +67,8 @@ where
     class: Theme::SuperClass<'a>,
     /// If the button should have no rounded corners.
     no_rounded_corner: bool,
+    /// The size of the button.
+    size: Length,
     /// If the button should be animated.
     animated: bool,
 }
@@ -87,6 +89,7 @@ where
             no_rounded_corner: false,
             animated: false,
             on_press: None,
+            size: 34.into(),
         }
     }
 
@@ -137,6 +140,12 @@ where
         self.animated = animated;
         self
     }
+
+    /// Sets the size of the button.
+    pub fn size(mut self, size: impl Into<Length>) -> Self {
+        self.size = size.into();
+        self
+    }
 }
 
 impl<'a, Message, Theme, Renderer> From<WindowButton<'a, Message, Theme, Renderer>>
@@ -158,7 +167,10 @@ where
 
         match window_button.animated {
             true => {
-                let mut button = iced_anim::widget::button(window_button.content).class(class);
+                let mut button = iced_anim::widget::button(window_button.content)
+                    .height(window_button.size)
+                    .width(window_button.size)
+                    .class(class);
 
                 if let Some(message) = window_button.on_press {
                     button = button.on_press(message);
@@ -167,7 +179,10 @@ where
                 button.into()
             }
             false => {
-                let mut button = button(window_button.content).class(class);
+                let mut button = button(window_button.content)
+                    .height(window_button.size)
+                    .width(window_button.size)
+                    .class(class);
 
                 if let Some(message) = window_button.on_press {
                     button = button.on_press(message);

@@ -4,11 +4,16 @@ use iced_core::{
     Border, Color, Padding, Shadow,
     border::Radius,
     color,
-    theme::{Base, Mode, Palette, Style},
+    theme::{
+        Base, Mode, Palette, Style,
+        palette::{Background, Danger, Extended, Pair, Primary, Secondary, Success, Warning},
+    },
 };
 use iced_widget::{button, container, scrollable, text, text_input};
 
-use crate::widget::{application, sidebar, window, window_background, window_bar, window_button};
+use crate::widget::{
+    application, content, sidebar, window, window_background, window_bar, window_button,
+};
 
 /// The name of the theme.
 pub const THEME_NAME: &str = "kitty";
@@ -21,6 +26,114 @@ pub const DARK_PALETTE: Palette = Palette {
     success: color!(0x00ff00),
     warning: color!(0xffff00),
     danger: color!(0xff0000),
+};
+
+pub const DARK_EXTERNAL_PALETTE: Extended = Extended {
+    is_dark: true,
+    background: Background {
+        base: Pair {
+            color: color!(0x000000),
+            text: color!(0xffffff),
+        },
+        weakest: Pair {
+            color: color!(0x232323),
+            text: color!(0x515151),
+        },
+        weaker: Pair {
+            color: color!(0x232323),
+            text: color!(0x515151),
+        },
+        weak: Pair {
+            color: color!(0x232323),
+            text: color!(0x515151),
+        },
+        neutral: Pair {
+            color: color!(0x232323),
+            text: color!(0x515151),
+        },
+        strong: Pair {
+            color: color!(0x232323),
+            text: color!(0x515151),
+        },
+        stronger: Pair {
+            color: color!(0x232323),
+            text: color!(0x515151),
+        },
+        strongest: Pair {
+            color: color!(0x232323),
+            text: color!(0x515151),
+        },
+    },
+    danger: Danger {
+        base: Pair {
+            color: color!(0xff0000),
+            text: color!(0xffffff),
+        },
+        weak: Pair {
+            color: color!(0xff0000),
+            text: color!(0xffffff),
+        },
+        strong: Pair {
+            color: color!(0xff0000),
+            text: color!(0xffffff),
+        },
+    },
+    primary: Primary {
+        base: Pair {
+            color: color!(0x8500ff),
+            text: color!(0xffffff),
+        },
+        weak: Pair {
+            color: color!(0x8500ff),
+            text: color!(0xffffff),
+        },
+        strong: Pair {
+            color: color!(0x8500ff),
+            text: color!(0xffffff),
+        },
+    },
+    secondary: Secondary {
+        base: Pair {
+            color: color!(0x0085ff),
+            text: color!(0xffffff),
+        },
+        weak: Pair {
+            color: color!(0x0085ff),
+            text: color!(0xffffff),
+        },
+        strong: Pair {
+            color: color!(0x0085ff),
+            text: color!(0xffffff),
+        },
+    },
+    success: Success {
+        base: Pair {
+            color: color!(0x00ff00),
+            text: color!(0xffffff),
+        },
+        weak: Pair {
+            color: color!(0x00ff00),
+            text: color!(0xffffff),
+        },
+        strong: Pair {
+            color: color!(0x00ff00),
+            text: color!(0xffffff),
+        },
+    },
+    warning: Warning {
+        base: Pair {
+            color: color!(0xffff00),
+            text: color!(0xffffff),
+        },
+        weak: Pair {
+            color: color!(0xffff00),
+            text: color!(0xffffff),
+        },
+        strong: Pair {
+            color: color!(0xffff00),
+            text: color!(0xffffff),
+        },
+    },
 };
 
 /// The theme for the application.
@@ -37,8 +150,16 @@ impl Theme {
     /// Returns the palette for the theme.
     pub fn palette(&self) -> Palette {
         match self {
-            Theme::Light => Palette::LIGHT,
-            Theme::Dark => DARK_PALETTE,
+            Self::Light => Palette::LIGHT,
+            Self::Dark => DARK_PALETTE,
+        }
+    }
+
+    /// Returns the extended palette for the theme.
+    pub fn extended(&self) -> Extended {
+        match self {
+            Self::Light => Extended::generate(Self::Light.palette()),
+            Self::Dark => DARK_EXTERNAL_PALETTE,
         }
     }
 
@@ -266,13 +387,20 @@ impl text_input::Catalog for Theme {
     type Class<'a> = text_input::StyleFn<'a, Self>;
 
     fn default<'a>() -> Self::Class<'a> {
-        Box::new(|_: &Theme, _: text_input::Status| text_input::Style {
-            background: Color::TRANSPARENT.into(),
-            border: Border::default(),
-            icon: Color::WHITE.into(),
-            placeholder: Color::WHITE.into(),
-            selection: Color::WHITE.into(),
-            value: Color::WHITE.into(),
+        Box::new(|theme: &Theme, _: text_input::Status| {
+            let extended = theme.extended();
+
+            text_input::Style {
+                background: extended.background.weakest.color.into(),
+                border: Border {
+                    radius: Radius::from(6),
+                    ..Default::default()
+                },
+                icon: extended.background.base.text.into(),
+                placeholder: extended.background.weakest.text.into(),
+                selection: extended.primary.base.color.into(),
+                value: extended.background.base.text.into(),
+            }
         })
     }
 
@@ -323,5 +451,17 @@ impl window::Catalog for Theme {
         style: impl Fn(&Self, window_button::Status, button::Status) -> button::Style + 'a,
     ) -> <Self as window_button::Catalog>::SuperClass<'a> {
         Box::new(style) as <Self as window_button::Catalog>::SuperClass<'a>
+    }
+
+    fn into_container_class<'a>(
+        style: impl Fn(&Self) -> container::Style + 'a,
+    ) -> <Self as container::Catalog>::Class<'a> {
+        Box::new(style) as <Self as container::Catalog>::Class<'a>
+    }
+}
+
+impl content::Catalog for Theme {
+    fn into_class<'a>(style: impl Fn(&Self) -> container::Style + 'a) -> Self::Class<'a> {
+        Box::new(style) as Self::Class<'a>
     }
 }

@@ -8,7 +8,7 @@ use kitty_theme_iced::{
     window_event,
 };
 
-use crate::screen::Screen;
+use crate::screen::{Screen, ScreenState, ScreenType};
 
 mod screen;
 
@@ -17,14 +17,18 @@ struct State {
     /// Whether the window is maximized.
     pub window_state: window_event::State,
     /// The current screen of the application.
-    pub screen: Screen,
+    pub screen: ScreenState,
 }
 
 /// The messages of the application.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 enum Message {
     /// The window needs to be dragged.
     Window(window_event::Event),
+    /// The search input has changed.
+    SearchInputChanged(String),
+    /// The screen needs to be changed.
+    ChangeScreen(ScreenType),
 }
 
 /// The main function of the application.
@@ -48,7 +52,7 @@ fn boot() -> (State, Task<Message>) {
     (
         State {
             window_state: Default::default(),
-            screen: Screen::new(),
+            screen: ScreenState::new(),
         },
         load_all(),
     )
@@ -60,16 +64,36 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::Window(event) => {
             window_event::update(&mut state.window_state, event).map(Message::Window)
         }
+        Message::SearchInputChanged(query) => {
+            state.screen.set_search_query(query);
+            Task::none()
+        }
+        Message::ChangeScreen(screen_type) => {
+            state.screen = screen_type.into();
+            Task::none()
+        }
     }
 }
 
 /// Renders the view of the application.
 fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
-    window(state.screen.content())
+    let mut window = window(state.screen.content())
         .on_event(Message::Window)
-        .window_state(state.window_state)
-        .window_bar_opposite(state.screen.window_bar_opposite())
-        .window_bar_center(state.screen.window_bar_center())
+        .window_state(state.window_state);
+
+    if let Some(opposite) = state.screen.window_bar_opposite() {
+        window = window.window_bar_opposite(opposite);
+    }
+
+    if let Some(center) = state.screen.window_bar_center() {
+        window = window.window_bar_center(center);
+    }
+
+    if let Some(side_width) = state.screen.window_bar_side_width() {
+        window = window.window_bar_side_width(side_width)
+    }
+
+    window
 }
 
 /// Subscribes to window resize events.

@@ -47,7 +47,7 @@ where
             buttons: None,
             opposite: None,
             left_buttons: false,
-            height: 30.into(),
+            height: 34.into(),
             on_press: None,
             on_double_click: None,
             centered: true,

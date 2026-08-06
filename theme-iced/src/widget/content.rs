@@ -3,11 +3,17 @@
 use iced_core::{Element, Length, Padding, Pixels};
 use iced_widget::container;
 
+/// A trait that defines a catalog for the content container.
+pub trait Catalog: container::Catalog {
+    /// Converts a style function into a class for the content container.
+    fn into_class<'a>(style: impl Fn(&Self) -> container::Style + 'a) -> Self::Class<'a>;
+}
+
 /// A widget that wraps content in a container with optional max width and padding.
 pub struct Content<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: container::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
 {
     /// The content of the widget.
@@ -21,7 +27,7 @@ where
 impl<'a, Message, Theme, Renderer> Content<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: container::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
 {
     /// Creates a new [`Content`] widget with the given content.
@@ -48,7 +54,7 @@ impl<'a, Message, Theme, Renderer> From<Content<'a, Message, Theme, Renderer>>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: container::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
 {
     fn from(content: Content<'a, Message, Theme, Renderer>) -> Self {
@@ -65,6 +71,7 @@ where
         container(child)
             .center_x(Length::Fill)
             .height(Length::Fill)
+            .class(Theme::into_class(container::transparent))
             .into()
     }
 }
