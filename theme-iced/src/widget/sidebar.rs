@@ -4,20 +4,20 @@ use iced_core::{Element, Length, Padding, Pixels, renderer};
 use iced_widget::{column, container, row};
 
 /// A catalog of styles for the [`Sidebar`] widget.
-pub trait Catalog {
+pub trait Catalog: container::Catalog {
     /// Returns the padding of the scaffold.
     fn padding() -> Padding;
     /// Returns the spacing between the content and the sidebar.
     fn spacing() -> Pixels;
+    /// Converts a style function into a class for the sidebar container.
+    fn into_class<'a>(style: impl Fn(&Self) -> container::Style + 'a) -> Self::Class<'a>;
 }
 
 /// A sidebar widget that can be used to create a layout with a sidebar and content.
 pub struct Sidebar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + container::Catalog + 'a,
-    Renderer: renderer::Renderer + 'a,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
+    Theme: Catalog + 'a,
 {
     /// The content of the scaffold.
     content: Element<'a, Message, Theme, Renderer>,
@@ -34,9 +34,8 @@ where
 impl<'a, Message, Theme, Renderer> Sidebar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + container::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     /// Creates a new [`Scaffold`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {

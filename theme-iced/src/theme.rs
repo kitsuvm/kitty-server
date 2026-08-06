@@ -1,14 +1,14 @@
 //! Kitty Theme for Iced.
 
 use iced_core::{
-    Border, Color, Padding,
+    Border, Color, Padding, Shadow,
     border::Radius,
     color,
     theme::{Base, Mode, Palette, Style},
 };
-use iced_widget::{button, container, text, text_input};
+use iced_widget::{button, container, scrollable, text, text_input};
 
-use crate::widget::{application, sidebar, window_background, window_button};
+use crate::widget::{application, sidebar, window, window_background, window_bar, window_button};
 
 /// The name of the theme.
 pub const THEME_NAME: &str = "kitty";
@@ -86,7 +86,7 @@ impl Base for Theme {
 }
 
 impl iced_widget::text::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme) -> iced_widget::text::Style>;
+    type Class<'a> = iced_widget::text::StyleFn<'a, Self>;
 
     fn default<'a>() -> Self::Class<'a> {
         Box::new(|theme: &Theme| text::Style {
@@ -100,7 +100,7 @@ impl iced_widget::text::Catalog for Theme {
 }
 
 impl iced_widget::container::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme) -> iced_widget::container::Style>;
+    type Class<'a> = iced_widget::container::StyleFn<'a, Self>;
 
     fn default<'a>() -> Self::Class<'a> {
         Box::new(|theme: &Theme| {
@@ -118,7 +118,7 @@ impl iced_widget::container::Catalog for Theme {
 }
 
 impl button::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme, button::Status) -> button::Style>;
+    type Class<'a> = button::StyleFn<'a, Self>;
 
     fn default<'a>() -> Self::Class<'a> {
         Box::new(|_: &Theme, _: button::Status| button::Style {
@@ -132,13 +132,20 @@ impl button::Catalog for Theme {
 }
 
 impl window_background::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme, window_background::Status) -> container::Style>;
+    type SuperClass<'a> = window_background::StyleFn<'a, Self>;
 
     fn padding() -> Option<Padding> {
         Some(Padding::from(1))
     }
 
-    fn default<'a>() -> Self::Class<'a> {
+    fn into_class<'a>(
+        class: Self::SuperClass<'a>,
+        status: window_background::Status,
+    ) -> Self::Class<'a> {
+        Box::new(move |theme: &Theme| Self::style(theme, &class, status))
+    }
+
+    fn default<'a>() -> Self::SuperClass<'a> {
         Box::new(|theme: &Theme, status: window_background::Status| {
             let palette = theme.palette();
 
@@ -162,7 +169,7 @@ impl window_background::Catalog for Theme {
 
     fn style(
         &self,
-        class: &Self::Class<'_>,
+        class: &Self::SuperClass<'_>,
         status: window_background::Status,
     ) -> container::Style {
         class(self, status)
@@ -181,41 +188,63 @@ impl application::Catalog for Theme {
 }
 
 impl window_button::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme, window_button::Status) -> button::Style>;
+    type SuperClass<'a> = window_button::StyleFn<'a, Self>;
 
-    fn default<'a>() -> Self::Class<'a> {
-        Box::new(|theme: &Theme, status: window_button::Status| {
-            let window_corner = match status.no_rounded_corner {
-                true => 0.0,
-                false => theme.window_radius(),
-            };
+    fn default<'a>() -> Self::SuperClass<'a> {
+        Box::new(
+            |theme: &Self, status: window_button::Status, button_status: button::Status| {
+                let window_corner = match status.no_rounded_corner {
+                    true => 0.0,
+                    false => theme.window_radius(),
+                };
 
-            button::Style {
-                border: match (status.button_position, status.left_buttons) {
-                    (window_button::Position::Left, true) => Border {
-                        radius: Radius::from(0).top_left(window_corner),
-                        color: Color::TRANSPARENT,
-                        width: theme.window_border_width(),
+                button::Style {
+                    border: match (status.button_position, status.left_buttons) {
+                        (window_button::Position::Left, true) => Border {
+                            radius: Radius::from(0).top_left(window_corner),
+                            color: Color::TRANSPARENT,
+                            width: theme.window_border_width(),
+                        },
+                        (window_button::Position::Right, false) => Border {
+                            radius: Radius::from(0).top_right(window_corner),
+                            color: Color::TRANSPARENT,
+                            width: theme.window_border_width(),
+                        },
+                        _ => Border::default(),
                     },
-                    (window_button::Position::Right, false) => Border {
-                        radius: Radius::from(0).top_right(window_corner),
-                        color: Color::TRANSPARENT,
-                        width: theme.window_border_width(),
+                    background: match button_status {
+                        button::Status::Pressed => Some(theme.palette().primary.into()),
+                        button::Status::Hovered => Some(theme.palette().primary.into()),
+                        _ => Some(Color::TRANSPARENT.into()),
                     },
-                    _ => Border::default(),
-                },
-                background: match status.button_status {
-                    button::Status::Pressed => Some(theme.palette().primary.into()),
-                    button::Status::Hovered => Some(theme.palette().primary.into()),
-                    _ => Some(Color::TRANSPARENT.into()),
-                },
-                ..Default::default()
-            }
-        })
+                    ..Default::default()
+                }
+            },
+        )
     }
 
-    fn style(&self, class: &Self::Class<'_>, status: window_button::Status) -> button::Style {
-        class(self, status)
+    fn style(
+        &self,
+        class: &Self::SuperClass<'_>,
+        status: window_button::Status,
+        button_status: button::Status,
+    ) -> button::Style {
+        class(self, status, button_status)
+    }
+
+    fn into_class<'a>(
+        class: Self::SuperClass<'a>,
+        status: window_button::Status,
+    ) -> Self::Class<'a> {
+        Box::new(move |theme: &Self, button_status: button::Status| {
+            Self::style(theme, &class, status, button_status)
+        }) as Self::Class<'a>
+    }
+}
+
+impl window_bar::Catalog for Theme {
+    fn into_class<'a>(style: impl Fn(&Self) -> container::Style + 'a) -> Self::Class<'a> {
+        Box::new(style) as Self::Class<'a>
     }
 }
 
@@ -227,10 +256,14 @@ impl sidebar::Catalog for Theme {
     fn spacing() -> iced_core::Pixels {
         25.into()
     }
+
+    fn into_class<'a>(style: impl Fn(&Self) -> container::Style + 'a) -> Self::Class<'a> {
+        (Box::new(style) as container::StyleFn<'a, Self>).into()
+    }
 }
 
 impl text_input::Catalog for Theme {
-    type Class<'a> = Box<dyn Fn(&Theme, text_input::Status) -> text_input::Style>;
+    type Class<'a> = text_input::StyleFn<'a, Self>;
 
     fn default<'a>() -> Self::Class<'a> {
         Box::new(|_: &Theme, _: text_input::Status| text_input::Style {
@@ -245,5 +278,50 @@ impl text_input::Catalog for Theme {
 
     fn style(&self, class: &Self::Class<'_>, status: text_input::Status) -> text_input::Style {
         class(self, status)
+    }
+}
+
+impl scrollable::Catalog for Theme {
+    type Class<'a> = scrollable::StyleFn<'a, Self>;
+
+    fn default<'a>() -> Self::Class<'a> {
+        Box::new(|_: &Self, _: scrollable::Status| scrollable::Style {
+            auto_scroll: scrollable::AutoScroll {
+                background: Color::BLACK.into(),
+                border: Border::default(),
+                shadow: Shadow::default(),
+                icon: Color::WHITE.into(),
+            },
+            container: container::Style::default(),
+            gap: None,
+            horizontal_rail: scrollable::Rail {
+                background: None,
+                border: Border::default(),
+                scroller: scrollable::Scroller {
+                    background: Color::BLACK.into(),
+                    border: Border::default(),
+                },
+            },
+            vertical_rail: scrollable::Rail {
+                background: None,
+                border: Border::default(),
+                scroller: scrollable::Scroller {
+                    background: Color::BLACK.into(),
+                    border: Border::default(),
+                },
+            },
+        })
+    }
+
+    fn style(&self, class: &Self::Class<'_>, status: scrollable::Status) -> scrollable::Style {
+        class(self, status)
+    }
+}
+
+impl window::Catalog for Theme {
+    fn into_button_class<'a>(
+        style: impl Fn(&Self, window_button::Status, button::Status) -> button::Style + 'a,
+    ) -> <Self as window_button::Catalog>::SuperClass<'a> {
+        Box::new(style) as <Self as window_button::Catalog>::SuperClass<'a>
     }
 }

@@ -3,12 +3,16 @@
 use iced_core::{Element, Length, alignment::Horizontal, renderer};
 use iced_widget::{container, mouse_area, row, space};
 
+pub trait Catalog: container::Catalog {
+    /// Converts a style function into a class for the window bar container.
+    fn into_class<'a>(style: impl Fn(&Self) -> container::Style + 'a) -> Self::Class<'a>;
+}
+
 pub struct WindowBar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: container::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     /// The content of the window bar.
     content: Element<'a, Message, Theme, Renderer>,
@@ -33,9 +37,8 @@ where
 impl<'a, Message, Theme, Renderer> WindowBar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: container::Catalog + 'a,
-    Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
+    Theme: Catalog + 'a,
+    Renderer: renderer::Renderer + 'a,
 {
     /// Creates a new [`WindowBar`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
@@ -105,26 +108,25 @@ impl<'a, Message, Theme, Renderer> From<WindowBar<'a, Message, Theme, Renderer>>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: container::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     fn from(window_bar: WindowBar<'a, Message, Theme, Renderer>) -> Self {
         let opposite = window_bar.opposite.map(|c| {
             container(c)
                 .center_y(window_bar.height)
-                .style(container::transparent)
+                .class(Theme::into_class(container::transparent))
         });
 
         let buttons = window_bar.buttons.map(|c| {
             container(c)
                 .center_y(window_bar.height)
-                .style(container::transparent)
+                .class(Theme::into_class(container::transparent))
         });
 
         let mut center_slot = container(window_bar.content)
             .center_y(window_bar.height)
-            .style(container::transparent);
+            .class(Theme::into_class(container::transparent));
 
         center_slot = match window_bar.centered {
             true => center_slot.align_x(Horizontal::Center),

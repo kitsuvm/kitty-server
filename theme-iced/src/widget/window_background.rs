@@ -17,15 +17,18 @@ pub enum Status {
 pub type StyleFn<'a, Theme> = Box<dyn Fn(&Theme, Status) -> container::Style + 'a>;
 
 /// Represents a catalog of styles for window containers.
-pub trait Catalog {
+pub trait Catalog: container::Catalog {
     /// The class of the window container.
-    type Class<'a>;
+    type SuperClass<'a>;
 
     /// Returns the default style class for a window container.
-    fn default<'a>() -> Self::Class<'a>;
+    fn default<'a>() -> Self::SuperClass<'a>;
 
     /// Returns the style for a container based on the given status.
-    fn style(&self, class: &Self::Class<'_>, status: Status) -> container::Style;
+    fn style(&self, class: &Self::SuperClass<'_>, status: Status) -> container::Style;
+
+    /// Converts a style function into a class for the window container.
+    fn into_class<'a>(class: Self::SuperClass<'a>, status: Status) -> Self::Class<'a>;
 
     /// Returns the padding for a window container.
     fn padding() -> Option<Padding> {
@@ -37,24 +40,22 @@ pub trait Catalog {
 pub struct WindowBackground<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + container::Catalog + 'a,
+    Theme: Catalog,
     Renderer: renderer::Renderer + 'a,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     /// The content of the window.
     content: Element<'a, Message, Theme, Renderer>,
     /// The status of the window.
     status: Status,
     /// The class of the window container.
-    class: <Theme as Catalog>::Class<'a>,
+    class: <Theme as Catalog>::SuperClass<'a>,
 }
 
 impl<'a, Message, Theme, Renderer> WindowBackground<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + container::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     /// Creates a new [`Window`] widget with the given content and status.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
@@ -73,14 +74,14 @@ where
     /// Sets the style function for the window.
     pub fn style(mut self, style: impl Fn(&Theme, Status) -> container::Style + 'a) -> Self
     where
-        <Theme as Catalog>::Class<'a>: From<StyleFn<'a, Theme>>,
+        Theme::SuperClass<'a>: From<StyleFn<'a, Theme>>,
     {
         self.class = (Box::new(style) as StyleFn<'a, Theme>).into();
         self
     }
 
     /// Sets the class of the window.
-    pub fn class(mut self, class: impl Into<<Theme as Catalog>::Class<'a>>) -> Self {
+    pub fn class(mut self, class: impl Into<Theme::SuperClass<'a>>) -> Self {
         self.class = class.into();
         self
     }
@@ -90,17 +91,14 @@ impl<'a, Message, Theme, Renderer> From<WindowBackground<'a, Message, Theme, Ren
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + container::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
 {
     fn from(window: WindowBackground<'a, Message, Theme, Renderer>) -> Self {
         let widget = container(window.content)
             .width(Length::Fill)
             .height(Length::Fill)
-            .style(move |theme: &Theme| {
-                <Theme as Catalog>::style(theme, &window.class, window.status)
-            });
+            .class(Theme::into_class(window.class, window.status));
 
         if let Some(padding) = Theme::padding() {
             widget.padding(padding)

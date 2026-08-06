@@ -4,14 +4,13 @@ use iced_core::{Font, Pixels, text::IntoFragment};
 pub use iced_widget::text::{Catalog, Style, Text};
 use iced_widget::text_input;
 
-use crate::font::MATERIAL_SYMBOLS_FILLED_ROUNDED_REGULAR_FONT;
+use crate::{font::MATERIAL_SYMBOLS_FILLED_ROUNDED_REGULAR_FONT, widget::text::TextRenderer};
 
 /// Returns a text widget with the Material Symbols Filled Rounded Regular font.
 pub fn icon<'a, Theme, Renderer>(text: impl IntoFragment<'a>) -> Text<'a, Theme, Renderer>
 where
     Theme: Catalog + 'a,
-    Renderer: iced_core::text::Renderer,
-    <Renderer as iced_core::text::Renderer>::Font: From<Font>,
+    Renderer: TextRenderer,
 {
     iced_widget::text(text).font(MATERIAL_SYMBOLS_FILLED_ROUNDED_REGULAR_FONT)
 }

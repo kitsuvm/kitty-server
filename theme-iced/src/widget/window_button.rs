@@ -17,8 +17,6 @@ pub enum Position {
 /// The status of the window button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Status {
-    /// The status of the button.
-    pub button_status: button::Status,
     /// The position of the button.
     pub button_position: Position,
     /// If the window buttons are aligned to the left or right of the window.
@@ -28,27 +26,34 @@ pub struct Status {
 }
 
 /// A catalog of styles for window buttons.
-pub trait Catalog {
+pub trait Catalog: button::Catalog {
     /// The class of the window button.
-    type Class<'a>;
+    type SuperClass<'a>;
 
     /// Returns the default style of the window button.
-    fn default<'a>() -> Self::Class<'a>;
+    fn default<'a>() -> Self::SuperClass<'a>;
 
     /// Returns the style of the window button based on its class and status.
-    fn style(&self, class: &Self::Class<'_>, status: Status) -> button::Style;
+    fn style(
+        &self,
+        class: &Self::SuperClass<'_>,
+        status: Status,
+        button_status: button::Status,
+    ) -> button::Style;
+
+    /// Converts a style function into a class for the window button.
+    fn into_class<'a>(class: Self::SuperClass<'a>, status: Status) -> Self::Class<'a>;
 }
 
 /// A type alias for a style function that takes a theme and a status and returns a button style.
-pub type StyleFn<'a, Theme> = Box<dyn Fn(&Theme, Status) -> button::Style + 'a>;
+pub type StyleFn<'a, Theme> = Box<dyn Fn(&Theme, Status, button::Status) -> button::Style + 'a>;
 
 /// A window button widget to create new buttons.
 pub struct WindowButton<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + button::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
-    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
 {
     /// The content of the button.
     content: Element<'a, Message, Theme, Renderer>,
@@ -59,7 +64,7 @@ where
     /// The message to send when the button is pressed.
     on_press: Option<Message>,
     /// The style function for the button.
-    class: <Theme as Catalog>::Class<'a>,
+    class: Theme::SuperClass<'a>,
     /// If the button should have no rounded corners.
     no_rounded_corner: bool,
     /// If the button should be animated.
@@ -69,9 +74,8 @@ where
 impl<'a, Message, Theme, Renderer> WindowButton<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + button::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
-    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
 {
     /// Creates a new [`WindowButton`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
@@ -105,16 +109,19 @@ where
     }
 
     /// Sets the style function for the button.
-    pub fn style(mut self, style: impl Fn(&Theme, Status) -> button::Style + 'a) -> Self
+    pub fn style(
+        mut self,
+        style: impl Fn(&Theme, Status, button::Status) -> button::Style + 'a,
+    ) -> Self
     where
-        <Theme as Catalog>::Class<'a>: From<StyleFn<'a, Theme>>,
+        Theme::SuperClass<'a>: From<StyleFn<'a, Theme>>,
     {
         self.class = (Box::new(style) as StyleFn<'a, Theme>).into();
         self
     }
 
     /// Sets the class of the button.
-    pub fn class(mut self, class: impl Into<<Theme as Catalog>::Class<'a>>) -> Self {
+    pub fn class(mut self, class: impl Into<Theme::SuperClass<'a>>) -> Self {
         self.class = class.into();
         self
     }
@@ -136,27 +143,22 @@ impl<'a, Message, Theme, Renderer> From<WindowButton<'a, Message, Theme, Rendere
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Catalog + button::Catalog + 'a,
+    Theme: Catalog + 'a,
     Renderer: renderer::Renderer + 'a,
-    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
 {
     fn from(window_button: WindowButton<'a, Message, Theme, Renderer>) -> Self {
+        let class = Theme::into_class(
+            window_button.class,
+            Status {
+                button_position: window_button.position,
+                left_buttons: window_button.left_buttons,
+                no_rounded_corner: window_button.no_rounded_corner,
+            },
+        );
+
         match window_button.animated {
             true => {
-                let mut button = iced_anim::widget::button(window_button.content).style(
-                    move |theme: &Theme, status: button::Status| {
-                        <Theme as Catalog>::style(
-                            theme,
-                            &window_button.class,
-                            Status {
-                                button_status: status,
-                                button_position: window_button.position,
-                                left_buttons: window_button.left_buttons,
-                                no_rounded_corner: window_button.no_rounded_corner,
-                            },
-                        )
-                    },
-                );
+                let mut button = iced_anim::widget::button(window_button.content).class(class);
 
                 if let Some(message) = window_button.on_press {
                     button = button.on_press(message);
@@ -165,20 +167,7 @@ where
                 button.into()
             }
             false => {
-                let mut button = button(window_button.content).style(
-                    move |theme: &Theme, status: button::Status| {
-                        <Theme as Catalog>::style(
-                            theme,
-                            &window_button.class,
-                            Status {
-                                button_status: status,
-                                button_position: window_button.position,
-                                left_buttons: window_button.left_buttons,
-                                no_rounded_corner: window_button.no_rounded_corner,
-                            },
-                        )
-                    },
-                );
+                let mut button = button(window_button.content).class(class);
 
                 if let Some(message) = window_button.on_press {
                     button = button.on_press(message);
@@ -190,14 +179,20 @@ where
     }
 }
 
-pub fn danger<'a, Theme>(theme: &Theme, status: Status) -> button::Style
+/// Returns a style for a danger button based on the given theme and status.
+pub fn danger<'a, Theme>(
+    theme: &Theme,
+    status: Status,
+    button_status: button::Status,
+) -> button::Style
 where
-    Theme: Catalog + Base + button::Catalog + 'a,
+    Theme: Catalog + Base + 'a,
 {
-    let base = <Theme as Catalog>::style(theme, &<Theme as Catalog>::default(), status);
+    let base =
+        <Theme as Catalog>::style(theme, &<Theme as Catalog>::default(), status, button_status);
 
     if matches!(
-        status.button_status,
+        button_status,
         button::Status::Pressed | button::Status::Hovered
     ) {
         base.with_background(theme.palette().map_or(color!(0xff000), |p| p.danger))

@@ -21,10 +21,8 @@ pub fn window_background<'a, Message, Theme, Renderer>(
 ) -> window_background::WindowBackground<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: window_background::Catalog + iced_widget::container::Catalog + 'a,
+    Theme: window_background::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as iced_widget::container::Catalog>::Class<'a>:
-        From<iced_widget::container::StyleFn<'a, Theme>>,
 {
     window_background::WindowBackground::new(content)
 }
@@ -35,10 +33,8 @@ pub fn window_bar<'a, Message, Theme, Renderer>(
 ) -> window_bar::WindowBar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: iced_widget::container::Catalog + 'a,
+    Theme: window_bar::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as iced_widget::container::Catalog>::Class<'a>:
-        From<iced_widget::container::StyleFn<'a, Theme>>,
 {
     window_bar::WindowBar::new(content)
 }
@@ -61,10 +57,8 @@ pub fn window_button<'a, Message, Theme, Renderer>(
 ) -> window_button::WindowButton<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: window_button::Catalog + iced_widget::button::Catalog + 'a,
+    Theme: window_button::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as iced_widget::button::Catalog>::Class<'a>:
-        From<iced_widget::button::StyleFn<'a, Theme>>,
 {
     window_button::WindowButton::new(content)
 }
@@ -75,20 +69,8 @@ pub fn window<'a, Message, Theme, Renderer>(
 ) -> window::Window<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: iced_core::theme::Base
-        + window_background::Catalog
-        + window_button::Catalog
-        + iced_widget::button::Catalog
-        + iced_widget::container::Catalog
-        + iced_widget::text::Catalog
-        + 'a,
-    Renderer: iced_core::text::Renderer + 'a,
-    <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
-    <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
-    <Theme as iced_widget::button::Catalog>::Class<'a>:
-        From<iced_widget::button::StyleFn<'a, Theme>>,
-    <Theme as iced_widget::container::Catalog>::Class<'a>:
-        From<iced_widget::container::StyleFn<'a, Theme>>,
+    Theme: window::Catalog + 'a,
+    Renderer: text::TextRenderer + 'a,
 {
     window::Window::new(content)
 }
@@ -99,10 +81,8 @@ pub fn sidebar<'a, Message, Theme, Renderer>(
 ) -> sidebar::Sidebar<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: sidebar::Catalog + iced_widget::container::Catalog + 'a,
+    Theme: sidebar::Catalog + 'a,
     Renderer: iced_core::renderer::Renderer + 'a,
-    <Theme as iced_widget::container::Catalog>::Class<'a>:
-        From<iced_widget::container::StyleFn<'a, Theme>>,
 {
     sidebar::Sidebar::new(content)
 }

@@ -1,12 +1,26 @@
 //! A window widget that can be used to create a custom window with a title bar and buttons.
 
 use iced_core::{Element, Length, theme::Base};
-use iced_widget::{Row, button, column, container, space, stack};
+use iced_widget::{Row, button, column, space, stack};
 
 use crate::{
-    widget::{icon, window_background, window_bar, window_button, window_resize},
+    widget::{
+        icon, text::TextRenderer, window_background, window_bar, window_button, window_resize,
+    },
     window_event,
 };
+
+pub trait Catalog:
+    window_background::Catalog
+    + window_button::Catalog
+    + iced_widget::text::Catalog
+    + window_bar::Catalog
+    + Base
+{
+    fn into_button_class<'a>(
+        style: impl Fn(&Self, window_button::Status, button::Status) -> button::Style + 'a,
+    ) -> <Self as window_button::Catalog>::SuperClass<'a>;
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 /// An enum representing the buttons that can be displayed in a window.
@@ -29,15 +43,8 @@ impl WindowButtons {
     ) -> window_button::WindowButton<'a, Message, Theme, Renderer>
     where
         Message: Clone + 'a,
-        Theme: Base
-            + window_button::Catalog
-            + iced_widget::button::Catalog
-            + iced_widget::text::Catalog
-            + 'a,
-        Renderer: iced_core::text::Renderer + 'a,
-        <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
-        <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
-        <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
+        Theme: Catalog + 'a,
+        Renderer: TextRenderer + 'a,
     {
         let button = match self {
             WindowButtons::Minimize => window_button(icon(icon::MINIMIZE_ICON)),
@@ -45,9 +52,8 @@ impl WindowButtons {
                 true => icon::UNMAXIMIZE_ICON,
                 false => icon::MAXIMIZE_ICON,
             })),
-            WindowButtons::Close => {
-                window_button(icon(icon::CLOSE_ICON)).style(window_button::danger)
-            }
+            WindowButtons::Close => window_button(icon(icon::CLOSE_ICON))
+                .class(Theme::into_button_class(window_button::danger)),
         }
         .no_rounded_corner(maximized)
         .animated(animated);
@@ -73,18 +79,8 @@ impl From<WindowButtons> for window_event::Event {
 pub struct Window<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Base
-        + window_background::Catalog
-        + window_button::Catalog
-        + iced_widget::button::Catalog
-        + iced_widget::container::Catalog
-        + iced_widget::text::Catalog
-        + 'a,
-    Renderer: iced_core::text::Renderer + 'a,
-    <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
-    <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
-    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
+    Theme: Catalog + 'a,
+    Renderer: TextRenderer + 'a,
 {
     /// The content of the window.
     content: Element<'a, Message, Theme, Renderer>,
@@ -113,18 +109,8 @@ where
 impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Base
-        + window_background::Catalog
-        + window_button::Catalog
-        + iced_widget::button::Catalog
-        + iced_widget::container::Catalog
-        + iced_widget::text::Catalog
-        + 'a,
-    Renderer: iced_core::text::Renderer + 'a,
-    <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
-    <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
-    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
+    Theme: Catalog + 'a,
+    Renderer: TextRenderer + 'a,
 {
     /// Creates a new [`Window`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
@@ -165,8 +151,8 @@ where
     }
 
     /// Sets the buttons of the window bar.
-    pub fn window_bar_buttons(mut self, buttons: Vec<WindowButtons>) -> Self {
-        self.window_bar_buttons = Some(buttons);
+    pub fn window_bar_buttons(mut self, buttons: impl IntoIterator<Item = WindowButtons>) -> Self {
+        self.window_bar_buttons = Some(buttons.into_iter().collect());
         self
     }
 
@@ -217,18 +203,8 @@ impl<'a, Message, Theme, Renderer> From<Window<'a, Message, Theme, Renderer>>
     for Element<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
-    Theme: Base
-        + window_background::Catalog
-        + window_button::Catalog
-        + iced_widget::button::Catalog
-        + iced_widget::container::Catalog
-        + iced_widget::text::Catalog
-        + 'a,
-    Renderer: iced_core::text::Renderer + 'a,
-    <Renderer as iced_core::text::Renderer>::Font: From<iced_core::Font>,
-    <Theme as window_button::Catalog>::Class<'a>: From<window_button::StyleFn<'a, Theme>>,
-    <Theme as button::Catalog>::Class<'a>: From<button::StyleFn<'a, Theme>>,
-    <Theme as container::Catalog>::Class<'a>: From<container::StyleFn<'a, Theme>>,
+    Theme: Catalog + 'a,
+    Renderer: TextRenderer + 'a,
 {
     fn from(window: Window<'a, Message, Theme, Renderer>) -> Self {
         let raw_window_bar_buttons =
