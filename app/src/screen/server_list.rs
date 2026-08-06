@@ -4,12 +4,12 @@ use iced::{
     Border, Color, Element, Length, Padding, Renderer,
     alignment::Vertical,
     border::Radius,
-    widget::{button, column, container, row, scrollable, space, text_input},
+    widget::{button, container, row, space, text_input},
 };
 use kitty_theme_iced::{
-    font::LATO_REGULAR_FONT,
+    font::LATO_BOLD_FONT,
     theme::Theme,
-    widget::{content, icon},
+    widget::{icon, text, text_bold},
 };
 
 use crate::{
@@ -35,7 +35,13 @@ impl State {
 
 impl Screen for State {
     fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer> {
-        content(scrollable(column![])).padding(0).into()
+        container(
+            text_bold("No Clients Available").style(|theme: &Theme| text::Style {
+                color: Some(theme.extended().background.weaker.text),
+            }),
+        )
+        .center(Length::Fill)
+        .into()
     }
 
     fn window_bar_side_width(&self) -> Option<Length> {
@@ -77,7 +83,7 @@ impl Screen for State {
         Some(
             container(
                 text_input("Search...", &self.search_query)
-                    .font(LATO_REGULAR_FONT)
+                    .font(LATO_BOLD_FONT)
                     .icon(icon::to_text_input_icon(icon::SEARCH_ICON, 0.0, None))
                     .on_input(Message::SearchInputChanged)
                     .size(14),

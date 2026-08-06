@@ -2,7 +2,7 @@
 
 use iced_core::Element;
 pub use icon::icon;
-pub use text::text;
+pub use text::{text, text_bold};
 
 pub mod application;
 pub mod content;
