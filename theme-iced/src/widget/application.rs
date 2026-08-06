@@ -2,6 +2,7 @@
 
 use iced_core::theme::Style;
 
+/// A trait for defining the style of the entire application background.
 pub trait Catalog {
     /// Returns the style for the application background.
     fn style(&self) -> Style;
