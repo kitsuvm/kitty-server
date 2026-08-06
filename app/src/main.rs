@@ -1,6 +1,6 @@
 //! Graphical user interface for the Kitty Server.
 
-use iced::{Element, Renderer, Subscription, Task, window::Settings};
+use iced::{Renderer, Subscription, Task, window::Settings};
 use kitty_theme_iced::{
     font::load_all,
     theme::Theme,
@@ -8,7 +8,7 @@ use kitty_theme_iced::{
     window_event,
 };
 
-use crate::screen::server_list;
+use crate::screen::Screen;
 
 mod screen;
 
@@ -16,6 +16,8 @@ mod screen;
 struct State {
     /// Whether the window is maximized.
     pub window_state: window_event::State,
+    /// The current screen of the application.
+    pub screen: Screen,
 }
 
 /// The messages of the application.
@@ -46,6 +48,7 @@ fn boot() -> (State, Task<Message>) {
     (
         State {
             window_state: Default::default(),
+            screen: Screen::new(),
         },
         load_all(),
     )
@@ -59,15 +62,14 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
         }
     }
 }
- 
+
 /// Renders the view of the application.
-fn view(state: &State) -> Element<'_, Message, Theme, Renderer> {
-    window(server_list::main())
+fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
+    window(state.screen.content())
         .on_event(Message::Window)
         .window_state(state.window_state)
-        .window_bar_opposite(server_list::window_bar_opposite())
-        .window_bar_center(server_list::window_bar_center())
-        .into()
+        .window_bar_opposite(state.screen.window_bar_opposite())
+        .window_bar_center(state.screen.window_bar_center())
 }
 
 /// Subscribes to window resize events.
