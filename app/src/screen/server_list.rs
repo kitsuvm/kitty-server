@@ -9,7 +9,7 @@ use iced::{
 use kitty_theme_iced::{
     font::LATO_BOLD_FONT,
     theme::Theme,
-    widget::{icon, text, text_bold},
+    widget::{icon, icon_button, text, text_bold},
 };
 
 use crate::{
@@ -49,29 +49,10 @@ impl Screen for State {
     }
 
     fn window_bar_opposite<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
-        let button_size = 26;
-
         Some(
             row![
                 space().width(8),
-                button(icon(icon::ADD_ICON).center())
-                    .padding(0)
-                    .on_press(Message::ChangeScreen(ScreenType::ServerAdd))
-                    .style(|theme: &Theme, status: button::Status| button::Style {
-                        background: match status {
-                            button::Status::Pressed | button::Status::Hovered => {
-                                Some(theme.extended().primary.base.color.into())
-                            }
-                            _ => Some(Color::TRANSPARENT.into()),
-                        },
-                        border: Border {
-                            radius: Radius::from(5),
-                            ..Default::default()
-                        },
-                        ..Default::default()
-                    })
-                    .width(button_size)
-                    .height(button_size)
+                icon_button(icon::ADD_ICON).on_press(Message::ChangeScreen(ScreenType::ServerAdd))
             ]
             .height(Length::Fill)
             .align_y(Vertical::Bottom)

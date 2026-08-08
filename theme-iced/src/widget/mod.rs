@@ -5,8 +5,10 @@ pub use icon::icon;
 pub use text::{text, text_bold};
 
 pub mod application;
+pub mod button;
 pub mod content;
 pub mod icon;
+pub mod icon_button;
 pub mod sidebar;
 pub mod text;
 pub mod window;
@@ -97,4 +99,28 @@ where
     Renderer: iced_core::renderer::Renderer + 'a,
 {
     content::Content::new(content)
+}
+
+/// Creates a new [`button::Button`] widget with the given content.
+pub fn button<'a, Message, Theme, Renderer>(
+    content: impl Into<Element<'a, Message, Theme, Renderer>>,
+) -> button::Button<'a, Message, Theme, Renderer>
+where
+    Message: Clone + 'a,
+    Theme: button::Catalog + 'a,
+    Renderer: iced_core::renderer::Renderer + 'a,
+{
+    button::Button::new(content)
+}
+
+/// Creates a new [`icon_button::IconButton`] widget with the given content.
+pub fn icon_button<'a, Message, Theme, Renderer>(
+    content: impl iced_widget::text::IntoFragment<'a>,
+) -> icon_button::IconButton<'a, Message, Theme, Renderer>
+where
+    Message: Clone + 'a,
+    Theme: icon_button::Catalog + 'a,
+    Renderer: text::TextRenderer + 'a,
+{
+    icon_button::IconButton::new(content)
 }

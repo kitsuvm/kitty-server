@@ -79,7 +79,8 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
     let mut window = window(state.screen.content())
         .on_event(Message::Window)
-        .window_state(state.window_state);
+        .window_state(state.window_state)
+        .animated(true);
 
     if let Some(opposite) = state.screen.window_bar_opposite() {
         window = window.window_bar_opposite(opposite);

@@ -1,7 +1,8 @@
 //! Custom window button widget.
 
 use iced_core::{Element, Length, color, renderer, theme::Base};
-use iced_widget::button;
+
+use crate::widget::button;
 
 /// The position of the window button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -25,10 +26,30 @@ pub struct Status {
     pub no_rounded_corner: bool,
 }
 
+#[derive(Debug, Clone, Copy)]
+/// The parameters for the window button.
+pub struct Parameters {
+    /// The position of the button.
+    pub position: Position,
+    /// If the window buttons are aligned to the left or right of the window.
+    pub left_buttons: bool,
+    /// If the button should have no rounded corners.
+    pub no_rounded_corner: bool,
+    /// The size of the button.
+    pub size: Length,
+    /// If the button should be animated.
+    pub animated: bool,
+    /// The animation mode of the button.
+    pub animation: Option<iced_anim::animated::Mode>,
+}
+
 /// A catalog of styles for window buttons.
 pub trait Catalog: button::Catalog {
     /// The class of the window button.
     type SuperClass<'a>;
+
+    /// Returns the default size of the window button.
+    fn default_parameters() -> Parameters;
 
     /// Returns the default style of the window button.
     fn default<'a>() -> Self::SuperClass<'a>;
@@ -71,6 +92,8 @@ where
     size: Length,
     /// If the button should be animated.
     animated: bool,
+    /// The animation mode of the button.
+    animation: Option<iced_anim::animated::Mode>,
 }
 
 impl<'a, Message, Theme, Renderer> WindowButton<'a, Message, Theme, Renderer>
@@ -81,21 +104,30 @@ where
 {
     /// Creates a new [`WindowButton`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
+        let parameters = <Theme as Catalog>::default_parameters();
+
         Self {
             content: content.into(),
-            position: Position::Center,
-            left_buttons: false,
             class: <Theme as Catalog>::default(),
-            no_rounded_corner: false,
-            animated: false,
             on_press: None,
-            size: 34.into(),
+            position: parameters.position,
+            left_buttons: parameters.left_buttons,
+            no_rounded_corner: parameters.no_rounded_corner,
+            size: parameters.size,
+            animated: parameters.animated,
+            animation: parameters.animation,
         }
     }
 
     /// Sets the message to send when the button is pressed.
     pub fn on_press(mut self, message: Message) -> Self {
         self.on_press = Some(message);
+        self
+    }
+
+    /// Sets the message to send when the button is pressed, allowing for `None` to be set.
+    pub fn on_press_mut(mut self, message: Option<Message>) -> Self {
+        self.on_press = message;
         self
     }
 
@@ -141,6 +173,12 @@ where
         self
     }
 
+    /// Sets the animation mode of the button.
+    pub fn animation(mut self, animation: impl Into<iced_anim::animated::Mode>) -> Self {
+        self.animation = Some(animation.into());
+        self
+    }
+
     /// Sets the size of the button.
     pub fn size(mut self, size: impl Into<Length>) -> Self {
         self.size = size.into();
@@ -165,32 +203,21 @@ where
             },
         );
 
-        match window_button.animated {
-            true => {
-                let mut button = iced_anim::widget::button(window_button.content)
-                    .height(window_button.size)
-                    .width(window_button.size)
-                    .class(class);
+        let mut button = button(window_button.content)
+            .height(window_button.size)
+            .width(window_button.size)
+            .animated(window_button.animated)
+            .class(class);
 
-                if let Some(message) = window_button.on_press {
-                    button = button.on_press(message);
-                }
-
-                button.into()
-            }
-            false => {
-                let mut button = button(window_button.content)
-                    .height(window_button.size)
-                    .width(window_button.size)
-                    .class(class);
-
-                if let Some(message) = window_button.on_press {
-                    button = button.on_press(message);
-                }
-
-                button.into()
-            }
+        if let Some(message) = window_button.on_press {
+            button = button.on_press(message);
         }
+
+        if let Some(animation) = window_button.animation {
+            button = button.animation(animation);
+        }
+
+        button.into()
     }
 }
 

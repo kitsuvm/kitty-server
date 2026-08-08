@@ -1,5 +1,7 @@
 //! Kitty Theme for Iced.
 
+use std::time::Duration;
+
 use iced_core::{
     Border, Color, Padding, Shadow,
     border::Radius,
@@ -9,10 +11,11 @@ use iced_core::{
         palette::{Background, Danger, Extended, Pair, Primary, Secondary, Success, Warning},
     },
 };
-use iced_widget::{button, container, scrollable, text, text_input};
+use iced_widget::{container, scrollable, text, text_input};
 
 use crate::widget::{
-    application, content, sidebar, window, window_background, window_bar, window_button,
+    application, button, content, icon_button, sidebar, window, window_background, window_bar,
+    window_button,
 };
 
 /// The name of the theme.
@@ -172,6 +175,13 @@ impl Theme {
     pub fn window_border_width(&self) -> f32 {
         1.2
     }
+
+    /// Returns the animation mode for the theme.
+    pub fn animation() -> iced_anim::animated::Mode {
+        iced_anim::transition::Easing::default()
+            .with_duration(Duration::from_millis(150))
+            .into()
+    }
 }
 
 impl Base for Theme {
@@ -238,16 +248,22 @@ impl iced_widget::container::Catalog for Theme {
     }
 }
 
-impl button::Catalog for Theme {
-    type Class<'a> = button::StyleFn<'a, Self>;
+impl iced_widget::button::Catalog for Theme {
+    type Class<'a> = iced_widget::button::StyleFn<'a, Self>;
 
     fn default<'a>() -> Self::Class<'a> {
-        Box::new(|_: &Theme, _: button::Status| button::Style {
-            ..Default::default()
-        })
+        Box::new(
+            |_: &Theme, _: iced_widget::button::Status| iced_widget::button::Style {
+                ..Default::default()
+            },
+        )
     }
 
-    fn style(&self, item: &Self::Class<'_>, status: button::Status) -> button::Style {
+    fn style(
+        &self,
+        item: &Self::Class<'_>,
+        status: iced_widget::button::Status,
+    ) -> iced_widget::button::Style {
         item(self, status)
     }
 }
@@ -310,6 +326,17 @@ impl application::Catalog for Theme {
 
 impl window_button::Catalog for Theme {
     type SuperClass<'a> = window_button::StyleFn<'a, Self>;
+
+    fn default_parameters() -> window_button::Parameters {
+        window_button::Parameters {
+            position: window_button::Position::Center,
+            left_buttons: false,
+            no_rounded_corner: false,
+            size: 34.into(),
+            animated: true,
+            animation: Some(Theme::animation()),
+        }
+    }
 
     fn default<'a>() -> Self::SuperClass<'a> {
         Box::new(
@@ -463,5 +490,50 @@ impl window::Catalog for Theme {
 impl content::Catalog for Theme {
     fn into_class<'a>(style: impl Fn(&Self) -> container::Style + 'a) -> Self::Class<'a> {
         Box::new(style) as Self::Class<'a>
+    }
+}
+
+impl icon_button::Catalog for Theme {
+    fn default_parameters() -> icon_button::Parameters {
+        icon_button::Parameters {
+            size: 26.into(),
+            icon_size: None,
+            animated: true,
+            animation: Some(Theme::animation()),
+        }
+    }
+
+    fn default<'a>() -> <Self as iced_widget::button::Catalog>::Class<'a> {
+        Box::new(|theme: &Theme, status: button::Status| button::Style {
+            background: match status {
+                button::Status::Pressed | button::Status::Hovered => {
+                    Some(theme.extended().primary.base.color.into())
+                }
+                _ => Some(Color::TRANSPARENT.into()),
+            },
+            border: Border {
+                radius: Radius::from(5),
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+    }
+
+    fn style<'a>(
+        &self,
+        class: <Self as iced_widget::button::Catalog>::Class<'a>,
+        status: button::Status,
+    ) -> iced_anim::widget::button::Style {
+        class(self, status)
+    }
+}
+
+impl button::Catalog for Theme {
+    fn default_parameters() -> button::Parameters {
+        button::Parameters {
+            animated: true,
+            animation: Some(Theme::animation()),
+            ..Default::default()
+        }
     }
 }
