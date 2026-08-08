@@ -42,3 +42,5 @@ pub const CLOSE_ICON: char = '\u{e5cd}';
 pub const ADD_ICON: char = '\u{e145}';
 /// Search icon using Material Symbols.
 pub const SEARCH_ICON: char = '\u{e8b6}';
+/// Chevron left icon using Material Symbols.
+pub const CHEVRON_LEFT_ICON: char = '\u{e5cb}';
