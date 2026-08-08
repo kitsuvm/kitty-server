@@ -2,7 +2,8 @@
 
 use iced_core::Element;
 pub use icon::icon;
-pub use text::{text, text_bold};
+
+use crate::renderer;
 
 pub mod application;
 pub mod button;
@@ -10,7 +11,6 @@ pub mod content;
 pub mod icon;
 pub mod icon_button;
 pub mod sidebar;
-pub mod text;
 pub mod window;
 pub mod window_background;
 pub mod window_bar;
@@ -72,7 +72,7 @@ pub fn window<'a, Message, Theme, Renderer>(
 where
     Message: Clone + 'a,
     Theme: window::Catalog + 'a,
-    Renderer: text::TextRenderer + 'a,
+    Renderer: renderer::TextRenderer + 'a,
 {
     window::Window::new(content)
 }
@@ -120,7 +120,7 @@ pub fn icon_button<'a, Message, Theme, Renderer>(
 where
     Message: Clone + 'a,
     Theme: icon_button::Catalog + 'a,
-    Renderer: text::TextRenderer + 'a,
+    Renderer: renderer::TextRenderer + 'a,
 {
     icon_button::IconButton::new(content)
 }

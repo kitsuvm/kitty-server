@@ -1,9 +1,10 @@
 //! Graphical user interface for the Kitty Server.
 
+use std::borrow::Cow;
+
 use iced::{Renderer, Subscription, Task, window::Settings};
 use kitty_theme_iced::{
-    font::load_all,
-    theme::Theme,
+    theme::{Theme, default_settings},
     widget::{application::application_style, window},
     window_event,
 };
@@ -38,6 +39,10 @@ fn main() -> iced::Result {
         .theme(|_: &State| Theme::Dark)
         .style(application_style)
         .subscription(subscription)
+        .settings(iced::Settings {
+            id: Some("kitty-server".into()),
+            ..default_settings()
+        })
         .window(Settings {
             min_size: Some((400, 300).into()),
             decorations: false,
@@ -54,7 +59,7 @@ fn boot() -> (State, Task<Message>) {
             window_state: Default::default(),
             screen: ScreenState::new(),
         },
-        load_all(),
+        Task::none(),
     )
 }
 
@@ -79,8 +84,7 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
     let mut window = window(state.screen.content())
         .on_event(Message::Window)
-        .window_state(state.window_state)
-        .animated(true);
+        .window_state(state.window_state);
 
     if let Some(opposite) = state.screen.window_bar_opposite() {
         window = window.window_bar_opposite(opposite);

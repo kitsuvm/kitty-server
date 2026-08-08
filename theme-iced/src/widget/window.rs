@@ -4,11 +4,29 @@ use iced_core::{Element, Length, Pixels, theme::Base};
 use iced_widget::{Row, button, column, container, space, stack};
 
 use crate::{
-    widget::{
-        icon, text::TextRenderer, window_background, window_bar, window_button, window_resize,
-    },
+    renderer::TextRenderer,
+    widget::{icon, window_background, window_bar, window_button, window_resize},
     window_event,
 };
+
+#[derive(Debug, Clone, Default)]
+/// A set of parameters for a [`Window`] widget.
+pub struct Parameters {
+    /// The buttons of the window bar.
+    pub window_bar_buttons: Option<Vec<WindowButtons>>,
+    /// Whether the buttons are on the left side of the window.
+    pub window_bar_left_buttons: Option<bool>,
+    /// Whether the window bar content is centered.
+    pub window_bar_centered: bool,
+    /// The width of the side content of the window bar.
+    pub window_bar_side_width: Option<Length>,
+    /// Whether the window bar buttons are animated.
+    pub animated: bool,
+    /// The animation mode of the window bar buttons.
+    pub animation: Option<iced_anim::animated::Mode>,
+    /// The size of the icons in the window bar buttons.
+    pub icon_size: Option<Pixels>,
+}
 
 /// A catalog of styles for the window widget.
 pub trait Catalog:
@@ -18,6 +36,9 @@ pub trait Catalog:
     + window_bar::Catalog
     + Base
 {
+    /// Returns the default parameters for the [`Window`] widget.
+    fn default_parameters() -> Parameters;
+
     /// Converts a style function into a class for the window button.
     fn into_button_class<'a>(
         style: impl Fn(&Self, window_button::Status, button::Status) -> button::Style + 'a,
@@ -48,6 +69,7 @@ impl WindowButtons {
         icon_size: Option<Pixels>,
         maximized: bool,
         animated: bool,
+        animation: Option<iced_anim::animated::Mode>,
     ) -> window_button::WindowButton<'a, Message, Theme, Renderer>
     where
         Message: Clone + 'a,
@@ -74,6 +96,10 @@ impl WindowButtons {
         )
         .no_rounded_corner(maximized)
         .animated(animated);
+
+        if let Some(animation) = animation {
+            button = button.animation(animation);
+        }
 
         if self == Self::Close {
             button = button.class(Theme::into_button_class(window_button::danger))
@@ -118,15 +144,17 @@ where
     /// The extra content for the side of the window buttons.
     window_bar_extra: Option<Element<'a, Message, Theme, Renderer>>,
     /// Whether the buttons are on the left side of the window.
-    window_bar_left_buttons: bool,
+    window_bar_left_buttons: Option<bool>,
     /// Whether the window bar content is centered.
     window_bar_centered: bool,
     /// The width of the side content of the window bar.
     window_bar_side_width: Option<Length>,
-    /// Whether the window bar buttons are animated.
-    animated: bool,
     /// The size of the icons in the window bar buttons.
     icon_size: Option<Pixels>,
+    /// Whether the window bar buttons are animated.
+    animated: bool,
+    /// The animation mode of the window bar buttons.
+    animation: Option<iced_anim::animated::Mode>,
 }
 
 impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer>
@@ -137,19 +165,22 @@ where
 {
     /// Creates a new [`Window`] widget with the given content.
     pub fn new(content: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
+        let parameters = <Theme as Catalog>::default_parameters();
+
         Self {
             content: content.into(),
             window_state: None,
             on_event: None,
             window_bar_center: None,
-            window_bar_buttons: None,
             window_bar_opposite: None,
             window_bar_extra: None,
-            window_bar_left_buttons: false,
-            window_bar_centered: true,
-            window_bar_side_width: None,
-            animated: false,
-            icon_size: None,
+            window_bar_buttons: parameters.window_bar_buttons,
+            window_bar_left_buttons: parameters.window_bar_left_buttons,
+            window_bar_centered: parameters.window_bar_centered,
+            window_bar_side_width: parameters.window_bar_side_width,
+            animation: parameters.animation,
+            animated: parameters.animated,
+            icon_size: parameters.icon_size,
         }
     }
 
@@ -200,7 +231,7 @@ where
 
     /// Sets whether the buttons are on the left side of the window.
     pub fn window_bar_left_buttons(mut self, left_buttons: bool) -> Self {
-        self.window_bar_left_buttons = left_buttons;
+        self.window_bar_left_buttons = Some(left_buttons);
         self
     }
 
@@ -237,21 +268,27 @@ where
     Renderer: TextRenderer + 'a,
 {
     fn from(window: Window<'a, Message, Theme, Renderer>) -> Self {
-        let raw_window_bar_buttons =
-            window
-                .window_bar_buttons
-                .unwrap_or_else(|| match window.window_bar_left_buttons {
-                    true => vec![
+        let (raw_window_bar_buttons, left_buttons) = window.window_bar_buttons.map_or_else(
+            || match window.window_bar_left_buttons {
+                Some(true) => (
+                    vec![
                         WindowButtons::Close,
                         WindowButtons::Minimize,
                         WindowButtons::Maximize,
                     ],
-                    false => vec![
+                    true,
+                ),
+                _ => (
+                    vec![
                         WindowButtons::Minimize,
                         WindowButtons::Maximize,
                         WindowButtons::Close,
                     ],
-                });
+                    false,
+                ),
+            },
+            |v| (v, window.window_bar_left_buttons.unwrap_or_default()),
+        );
 
         let last_window_bar_button_index = raw_window_bar_buttons.len().saturating_sub(1);
 
@@ -268,8 +305,8 @@ where
                             window.icon_size,
                             window.window_state.is_some_and(|s| s.maximized),
                             window.animated,
+                            window.animation,
                         )
-                        .left_buttons(window.window_bar_left_buttons)
                         .position(match i {
                             0 => window_button::Position::Left,
                             i if i == last_window_bar_button_index => {
@@ -281,7 +318,7 @@ where
             })
             .collect::<Vec<_>>();
 
-        match (window.window_bar_extra, window.window_bar_left_buttons) {
+        match (window.window_bar_extra, left_buttons) {
             (Some(content), false) => window_bar_buttons.insert(0, content),
             (Some(content), true) => window_bar_buttons.push(content),
             _ => {}
@@ -289,7 +326,7 @@ where
 
         let mut window_bar = window_bar(window.window_bar_center.unwrap_or(space().into()))
             .buttons(Row::with_children(window_bar_buttons))
-            .left_buttons(window.window_bar_left_buttons)
+            .left_buttons(left_buttons)
             .centered(window.window_bar_centered);
 
         if let Some(side_width) = window.window_bar_side_width {

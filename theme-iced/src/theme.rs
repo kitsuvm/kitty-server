@@ -3,7 +3,7 @@
 use std::time::Duration;
 
 use iced_core::{
-    Border, Color, Padding, Shadow,
+    Border, Color, Padding, Settings, Shadow,
     border::Radius,
     color,
     theme::{
@@ -13,10 +13,25 @@ use iced_core::{
 };
 use iced_widget::{container, scrollable, text, text_input};
 
-use crate::widget::{
-    application, button, content, icon_button, sidebar, window, window_background, window_bar,
-    window_button,
+use crate::{
+    font::{LATO_BOLD_FONT, fonts},
+    widget::{
+        application, button, content, icon_button, sidebar, window, window_background, window_bar,
+        window_button,
+    },
 };
+
+/// The default settings for the application.
+pub fn default_settings() -> Settings {
+    Settings {
+        id: None,
+        fonts: fonts(),
+        default_font: LATO_BOLD_FONT,
+        default_text_size: 14.into(),
+        antialiasing: true,
+        vsync: true,
+    }
+}
 
 /// The name of the theme.
 pub const THEME_NAME: &str = "kitty";
@@ -474,6 +489,16 @@ impl scrollable::Catalog for Theme {
 }
 
 impl window::Catalog for Theme {
+    fn default_parameters() -> window::Parameters {
+        window::Parameters {
+            animated: true,
+            animation: Some(Theme::animation()),
+            window_bar_centered: true,
+            icon_size: Some(16.into()),
+            ..Default::default()
+        }
+    }
+
     fn into_button_class<'a>(
         style: impl Fn(&Self, window_button::Status, button::Status) -> button::Style + 'a,
     ) -> <Self as window_button::Catalog>::SuperClass<'a> {

@@ -1,15 +1,13 @@
 //! The server list screen.
 
 use iced::{
-    Border, Color, Element, Length, Padding, Renderer,
+    Element, Length, Padding, Renderer,
     alignment::Vertical,
-    border::Radius,
-    widget::{button, container, row, space, text_input},
+    widget::{container, row, space, text, text_input},
 };
 use kitty_theme_iced::{
-    font::LATO_BOLD_FONT,
     theme::Theme,
-    widget::{icon, icon_button, text, text_bold},
+    widget::{icon, icon_button},
 };
 
 use crate::{
@@ -36,10 +34,11 @@ impl State {
 impl Screen for State {
     fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer> {
         container(
-            text_bold("No Clients Available").style(|theme: &Theme| text::Style {
+            text("No Clients Available").style(|theme: &Theme| text::Style {
                 color: Some(theme.extended().background.weaker.text),
             }),
         )
+        .style(container::transparent)
         .center(Length::Fill)
         .into()
     }
@@ -64,10 +63,8 @@ impl Screen for State {
         Some(
             container(
                 text_input("Search...", &self.search_query)
-                    .font(LATO_BOLD_FONT)
                     .icon(icon::to_text_input_icon(icon::SEARCH_ICON, 0.0, None))
-                    .on_input(Message::SearchInputChanged)
-                    .size(14),
+                    .on_input(Message::SearchInputChanged),
             )
             .max_width(360)
             .padding(Padding::from(0).top(8))

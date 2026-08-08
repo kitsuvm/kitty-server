@@ -1,10 +1,11 @@
 //! This module contains the fonts for the Kitty Theme.
 
+use std::borrow::Cow;
+
 use iced_core::{
     Font,
     font::{Family, Stretch, Style, Weight},
 };
-use iced_runtime::{Task, font};
 
 /// Lato Regular font bytes
 pub static LATO_REGULAR_BYTES: &[u8] = include_bytes!("./Lato-Regular.ttf");
@@ -40,26 +41,14 @@ pub const MATERIAL_SYMBOLS_FILLED_ROUNDED_REGULAR_FONT: Font = Font {
     style: Style::Normal,
 };
 
-/// Loads the fonts for the Kitty Theme.
-pub fn load_all<Message: Send + 'static>() -> Task<Message> {
-    Task::batch([
-        load_lato_regular(),
-        load_lato_bold(),
-        load_material_symbols_rounded_filled(),
-    ])
-}
+/// A list of all the fonts from Kitty Theme.
+pub static FONTS: &[&[u8]] = &[
+    LATO_REGULAR_BYTES,
+    LATO_BOLD_BYTES,
+    MATERIAL_SYMBOLS_ROUNDED_FILLED_REGULAR_BYTES,
+];
 
-/// Load the Lato Regular font for the Kitty Theme.
-pub fn load_lato_regular<Message: Send + 'static>() -> Task<Message> {
-    font::load(LATO_REGULAR_BYTES).discard()
-}
-
-/// Load the Lato Bold font for the Kitty Theme.
-pub fn load_lato_bold<Message: Send + 'static>() -> Task<Message> {
-    font::load(LATO_BOLD_BYTES).discard()
-}
-
-/// Load the Material Symbols Rounded Filled font for the Kitty Theme.
-pub fn load_material_symbols_rounded_filled<Message: Send + 'static>() -> Task<Message> {
-    font::load(MATERIAL_SYMBOLS_ROUNDED_FILLED_REGULAR_BYTES).discard()
+/// Returns a vector of all the fonts from Kitty Theme to be used in the application settings.
+pub fn fonts() -> Vec<Cow<'static, [u8]>> {
+    FONTS.iter().map(|&font| Cow::Borrowed(font)).collect()
 }

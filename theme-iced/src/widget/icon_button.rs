@@ -4,8 +4,12 @@ use iced_core::{
     Element, Length, Pixels,
     text::{Fragment, IntoFragment},
 };
+use iced_widget::text;
 
-use crate::widget::{button, icon, text};
+use crate::{
+    renderer::TextRenderer,
+    widget::{button, icon},
+};
 
 #[derive(Debug, Clone, Copy)]
 /// A set of parameters for an [`IconButton`] widget.
@@ -41,7 +45,7 @@ pub struct IconButton<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + 'a,
-    Renderer: text::TextRenderer + 'a,
+    Renderer: TextRenderer + 'a,
 {
     content: Fragment<'a>,
     size: Length,
@@ -57,7 +61,7 @@ impl<'a, Message, Theme, Renderer> IconButton<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + 'a,
-    Renderer: text::TextRenderer + 'a,
+    Renderer: TextRenderer + 'a,
 {
     /// Creates a new [`IconButton`] widget.
     pub fn new(content: impl IntoFragment<'a>) -> Self {
@@ -129,7 +133,7 @@ impl<'a, Message, Theme, Renderer> From<IconButton<'a, Message, Theme, Renderer>
 where
     Message: Clone + 'a,
     Theme: Catalog + 'a,
-    Renderer: text::TextRenderer + 'a,
+    Renderer: TextRenderer + 'a,
 {
     fn from(value: IconButton<'a, Message, Theme, Renderer>) -> Self {
         let mut content = icon(value.content).center();
