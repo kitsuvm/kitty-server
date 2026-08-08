@@ -33,6 +33,16 @@ pub fn default_settings() -> Settings {
     }
 }
 
+/// The default window settings for the application.
+pub fn default_window_settings() -> iced_core::window::Settings {
+    iced_core::window::Settings {
+        min_size: Some((400, 300).into()),
+        decorations: false,
+        transparent: true,
+        ..Default::default()
+    }
+}
+
 /// The name of the theme.
 pub const THEME_NAME: &str = "kitty";
 

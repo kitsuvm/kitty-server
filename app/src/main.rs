@@ -4,7 +4,7 @@ use std::borrow::Cow;
 
 use iced::{Renderer, Subscription, Task, window::Settings};
 use kitty_theme_iced::{
-    theme::{Theme, default_settings},
+    theme::{Theme, default_settings, default_window_settings},
     widget::{application::application_style, window},
     window_event,
 };
@@ -43,12 +43,7 @@ fn main() -> iced::Result {
             id: Some("kitty-server".into()),
             ..default_settings()
         })
-        .window(Settings {
-            min_size: Some((400, 300).into()),
-            decorations: false,
-            transparent: true,
-            ..Default::default()
-        })
+        .window(default_window_settings())
         .run()
 }
 
