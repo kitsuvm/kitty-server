@@ -532,7 +532,7 @@ impl icon_button::Catalog for Theme {
     fn default_parameters() -> icon_button::Parameters {
         icon_button::Parameters {
             size: 26.into(),
-            icon_size: None,
+            icon_size: Some(16.into()),
             animated: true,
             animation: Some(Theme::animation()),
         }
