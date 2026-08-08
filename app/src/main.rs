@@ -1,8 +1,6 @@
 //! Graphical user interface for the Kitty Server.
 
-use std::borrow::Cow;
-
-use iced::{Renderer, Subscription, Task, window::Settings};
+use iced::{Renderer, Subscription, Task};
 use kitty_theme_iced::{
     theme::{Theme, default_settings, default_window_settings},
     widget::{application::application_style, window},

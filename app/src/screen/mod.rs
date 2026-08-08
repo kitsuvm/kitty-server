@@ -73,7 +73,7 @@ impl Screen for ScreenState {
     fn window_bar_opposite<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
         match self {
             Self::ServerList(state) => state.window_bar_opposite(),
-            _ => None,
+            Self::ServerAdd(state) => state.window_bar_opposite(),
         }
     }
 
