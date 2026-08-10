@@ -1,22 +1,29 @@
 //! Graphical user interface for the Kitty Server.
 
-use iced::{Renderer, Subscription, Task};
+use iced::{Renderer, Subscription, Task, widget::stack};
 use kitty_theme_iced::{
     theme::{Theme, default_settings, default_window_settings},
     widget::{application::application_style, window},
     window_event,
 };
 
-use crate::screen::{Screen, ScreenState, ScreenType};
+use crate::{
+    modal::{ModalKind, ModalState},
+    screen::{Screen, ScreenKind, ScreenState},
+};
 
+mod modal;
 mod screen;
 
 /// The state of the application.
+#[derive(Debug, Clone, Default)]
 struct State {
     /// Whether the window is maximized.
     pub window_state: window_event::State,
     /// The current screen of the application.
     pub screen: ScreenState,
+    /// The current modal of the application.
+    pub modal: ModalState,
 }
 
 /// The messages of the application.
@@ -27,7 +34,11 @@ enum Message {
     /// The search input has changed.
     SearchInputChanged(String),
     /// The screen needs to be changed.
-    ChangeScreen(ScreenType),
+    ChangeScreen(ScreenKind),
+    /// The modal needs to be opened.
+    OpenModal(ModalKind),
+    /// Close the modal.
+    CloseModal,
 }
 
 /// The main function of the application.
@@ -47,13 +58,7 @@ fn main() -> iced::Result {
 
 /// Boots the application.
 fn boot() -> (State, Task<Message>) {
-    (
-        State {
-            window_state: Default::default(),
-            screen: ScreenState::new(),
-        },
-        Task::none(),
-    )
+    (State::default(), Task::none())
 }
 
 /// Updates the state of the application.
@@ -70,12 +75,20 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
             state.screen = screen_type.into();
             Task::none()
         }
+        Message::OpenModal(modal_kind) => {
+            state.modal = modal_kind.into();
+            Task::none()
+        }
+        Message::CloseModal => {
+            state.modal = ModalState::None;
+            Task::none()
+        }
     }
 }
 
 /// Renders the view of the application.
 fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
-    let mut window = window(state.screen.content())
+    let mut window = window(stack![state.screen.content()])
         .on_event(Message::Window)
         .window_state(state.window_state);
 
