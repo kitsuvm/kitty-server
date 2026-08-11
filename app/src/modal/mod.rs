@@ -2,7 +2,7 @@
 
 use iced::{
     Border, Color, Element, Length, Renderer, color,
-    widget::{container, mouse_area},
+    widget::{container, opaque},
 };
 use kitty_theme_iced::{theme::Theme, widget::window_background};
 
@@ -83,11 +83,13 @@ pub fn modal(state: &ModalState) -> Option<Element<'_, Message, Theme, Renderer>
     state.content().map(|content| {
         let content_size = content.as_widget().size_hint();
 
-        mouse_area(
+        opaque(
             container(
                 window_background(content)
                     .width(content_size.width.fluid())
-                    .height(content_size.height.fluid()),
+                    .height(content_size.height.fluid())
+                    .max_width(310)
+                    .padding(16),
             )
             .center(Length::Fill)
             .style(|theme: &Theme| container::Style {
@@ -100,7 +102,6 @@ pub fn modal(state: &ModalState) -> Option<Element<'_, Message, Theme, Renderer>
                 ..Default::default()
             }),
         )
-        .on_press(Message::CloseModal)
         .into()
     })
 }

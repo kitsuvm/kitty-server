@@ -39,6 +39,8 @@ enum Message {
     OpenModal(ModalKind),
     /// Close the modal.
     CloseModal,
+    /// Submit the modal, closing it.
+    SubmitModal,
 }
 
 /// The main function of the application.
@@ -80,6 +82,10 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
             Task::none()
         }
         Message::CloseModal => {
+            state.modal = ModalState::None;
+            Task::none()
+        }
+        Message::SubmitModal => {
             state.modal = ModalState::None;
             Task::none()
         }
