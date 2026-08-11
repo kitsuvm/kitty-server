@@ -6,20 +6,21 @@ use iced_core::{
     Border, Color, Length, Padding, Settings, Shadow,
     border::Radius,
     color,
-    theme::{
-        Base, Mode, Palette, Style,
-        palette::{Background, Danger, Extended, Pair, Primary, Secondary, Success, Warning},
-    },
+    theme::{Base, Mode, Palette, Style, palette::Extended},
 };
 use iced_widget::{container, scrollable, text, text_input};
 
 use crate::{
+    BaseExtended,
     font::{LATO_BOLD_FONT, fonts},
+    theme::dark::{DARK_EXTERNAL_PALETTE, DARK_PALETTE},
     widget::{
         application, button, content, icon_button, sidebar, window, window_background, window_bar,
         window_button,
     },
 };
+
+mod dark;
 
 /// The default settings for the application.
 pub fn default_settings() -> Settings {
@@ -45,124 +46,6 @@ pub fn default_window_settings() -> iced_core::window::Settings {
 
 /// The name of the theme.
 pub const THEME_NAME: &str = "kitty";
-
-/// The palette for the dark theme.
-pub const DARK_PALETTE: Palette = Palette {
-    background: color!(0x000000),
-    text: color!(0xffffff),
-    primary: color!(0x8500ff),
-    success: color!(0x00ff00),
-    warning: color!(0xffff00),
-    danger: color!(0xff0000),
-};
-
-pub const DARK_EXTERNAL_PALETTE: Extended = Extended {
-    is_dark: true,
-    background: Background {
-        base: Pair {
-            color: color!(0x000000),
-            text: color!(0xffffff),
-        },
-        weakest: Pair {
-            color: color!(0x232323),
-            text: color!(0x515151),
-        },
-        weaker: Pair {
-            color: color!(0x232323),
-            text: color!(0x515151),
-        },
-        weak: Pair {
-            color: color!(0x232323),
-            text: color!(0x515151),
-        },
-        neutral: Pair {
-            color: color!(0x232323),
-            text: color!(0x515151),
-        },
-        strong: Pair {
-            color: color!(0x232323),
-            text: color!(0x515151),
-        },
-        stronger: Pair {
-            color: color!(0x232323),
-            text: color!(0x515151),
-        },
-        strongest: Pair {
-            color: color!(0x232323),
-            text: color!(0x515151),
-        },
-    },
-    danger: Danger {
-        base: Pair {
-            color: color!(0xff0000),
-            text: color!(0xffffff),
-        },
-        weak: Pair {
-            color: color!(0xff0000),
-            text: color!(0xffffff),
-        },
-        strong: Pair {
-            color: color!(0xff0000),
-            text: color!(0xffffff),
-        },
-    },
-    primary: Primary {
-        base: Pair {
-            color: color!(0x8500ff),
-            text: color!(0xffffff),
-        },
-        weak: Pair {
-            color: color!(0x8500ff),
-            text: color!(0xffffff),
-        },
-        strong: Pair {
-            color: color!(0x8500ff),
-            text: color!(0xffffff),
-        },
-    },
-    secondary: Secondary {
-        base: Pair {
-            color: color!(0x0085ff),
-            text: color!(0xffffff),
-        },
-        weak: Pair {
-            color: color!(0x0085ff),
-            text: color!(0xffffff),
-        },
-        strong: Pair {
-            color: color!(0x0085ff),
-            text: color!(0xffffff),
-        },
-    },
-    success: Success {
-        base: Pair {
-            color: color!(0x00ff00),
-            text: color!(0xffffff),
-        },
-        weak: Pair {
-            color: color!(0x00ff00),
-            text: color!(0xffffff),
-        },
-        strong: Pair {
-            color: color!(0x00ff00),
-            text: color!(0xffffff),
-        },
-    },
-    warning: Warning {
-        base: Pair {
-            color: color!(0xffff00),
-            text: color!(0xffffff),
-        },
-        weak: Pair {
-            color: color!(0xffff00),
-            text: color!(0xffffff),
-        },
-        strong: Pair {
-            color: color!(0xffff00),
-            text: color!(0xffffff),
-        },
-    },
-};
 
 /// The theme for the application.
 #[derive(Clone, Copy, PartialEq, Eq, Default)]
@@ -241,6 +124,12 @@ impl Base for Theme {
     }
 }
 
+impl BaseExtended for Theme {
+    fn palette_extended(&self) -> Extended {
+        self.extended()
+    }
+}
+
 impl iced_widget::text::Catalog for Theme {
     type Class<'a> = iced_widget::text::StyleFn<'a, Self>;
 
@@ -277,11 +166,28 @@ impl iced_widget::button::Catalog for Theme {
     type Class<'a> = iced_widget::button::StyleFn<'a, Self>;
 
     fn default<'a>() -> Self::Class<'a> {
-        Box::new(
-            |_: &Theme, _: iced_widget::button::Status| iced_widget::button::Style {
+        Box::new(|theme: &Theme, status: iced_widget::button::Status| {
+            let palette = theme.extended();
+
+            iced_widget::button::Style {
+                background: match status {
+                    iced_widget::button::Status::Pressed | iced_widget::button::Status::Hovered => {
+                        Some(palette.background.weakest.color.into())
+                    }
+                    _ => Some(Color::TRANSPARENT.into()),
+                },
+                text_color: match status {
+                    iced_widget::button::Status::Disabled => palette.background.weakest.text,
+                    _ => palette.background.base.text,
+                },
+                border: Border {
+                    radius: Radius::from(5),
+                    color: Color::TRANSPARENT,
+                    width: 0.0,
+                },
                 ..Default::default()
-            },
-        )
+            }
+        })
     }
 
     fn style(
