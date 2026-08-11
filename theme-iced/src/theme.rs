@@ -3,7 +3,7 @@
 use std::time::Duration;
 
 use iced_core::{
-    Border, Color, Padding, Settings, Shadow,
+    Border, Color, Length, Padding, Settings, Shadow,
     border::Radius,
     color,
     theme::{
@@ -296,8 +296,14 @@ impl iced_widget::button::Catalog for Theme {
 impl window_background::Catalog for Theme {
     type SuperClass<'a> = window_background::StyleFn<'a, Self>;
 
-    fn padding() -> Option<Padding> {
-        Some(Padding::from(1))
+    fn default_parameters() -> window_background::Parameters {
+        window_background::Parameters {
+            width: Some(Length::Fill),
+            height: Some(Length::Fill),
+            max_width: None,
+            max_height: None,
+            padding: Some(1.into()),
+        }
     }
 
     fn into_class<'a>(
