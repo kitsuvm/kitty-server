@@ -1,11 +1,15 @@
 //! Graphical user interface for the Kitty Server.
 
+use std::{fs, process::ExitCode};
+
+use directories::ProjectDirs;
 use iced::{Renderer, Subscription, Task};
 use kitty_theme_iced::{
     theme::{Theme, default_settings, default_window_settings},
     widget::{application::application_style, window},
     window_event,
 };
+use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     modal::{ModalKind, ModalState, modal},
@@ -44,8 +48,57 @@ enum Message {
 }
 
 /// The main function of the application.
-fn main() -> iced::Result {
-    iced::application::<State, Message, Theme, Renderer>(boot, update, view)
+fn main() -> ExitCode {
+    let Some(dirs) = ProjectDirs::from("com", "KitsuVM", "Kitty Server") else {
+        eprintln!("Could not determine project directories.");
+        return ExitCode::from(1);
+    };
+
+    let log_dir = dirs.data_local_dir().join("logs");
+    if let Err(e) = fs::create_dir_all(&log_dir) {
+        eprintln!("Could not create log directory: {}", e);
+        return ExitCode::from(2);
+    }
+
+    let log_file = match tracing_appender::rolling::Builder::new()
+        .filename_suffix("log")
+        .max_log_files(3)
+        .latest_symlink("latest.log")
+        .rotation(tracing_appender::rolling::Rotation::MINUTELY)
+        .build(log_dir)
+    {
+        Ok(file) => file,
+        Err(e) => {
+            eprintln!("Could not create log file: {}", e);
+            return ExitCode::from(3);
+        }
+    };
+
+    let (non_blocking, _guard) = tracing_appender::non_blocking(log_file);
+
+    let file_layer = tracing_subscriber::fmt::layer()
+        .with_writer(non_blocking)
+        .with_ansi(false)
+        .with_filter(
+            tracing_subscriber::filter::Targets::new()
+                .with_target("kitty_server_app", tracing::Level::TRACE),
+        );
+
+    let stdout_layer = tracing_subscriber::fmt::layer().with_filter(
+        EnvFilter::try_from_env("KITTY_SERVER_LOG")
+            .unwrap_or_else(|_| EnvFilter::new("kitty_server_app=info")),
+    );
+
+    if let Err(e) = tracing_subscriber::registry()
+        .with(file_layer)
+        .with(stdout_layer)
+        .try_init()
+    {
+        eprintln!("Could not initialize tracing subscriber: {}", e);
+        return ExitCode::from(4);
+    }
+
+    if let Err(e) = iced::application::<State, Message, Theme, Renderer>(boot, update, view)
         .title("Kitty Server")
         .theme(|_: &State| Theme::Dark)
         .style(application_style)
@@ -56,6 +109,12 @@ fn main() -> iced::Result {
         })
         .window(default_window_settings())
         .run()
+    {
+        tracing::error!("Application error: {}", e);
+        ExitCode::from(5)
+    } else {
+        ExitCode::SUCCESS
+    }
 }
 
 /// Boots the application.
@@ -65,6 +124,7 @@ fn boot() -> (State, Task<Message>) {
 
 /// Updates the state of the application.
 fn update(state: &mut State, message: Message) -> Task<Message> {
+    tracing::debug!(?message, "Processing message...");
     match message {
         Message::Window(event) => {
             window_event::update(&mut state.window_state, event).map(Message::Window)
@@ -98,6 +158,7 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 
 /// Renders the view of the application.
 fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
+    tracing::trace!(?state, "Rendering view...");
     let mut window = window(state.screen.content())
         .on_event(Message::Window)
         .window_state(state.window_state);
