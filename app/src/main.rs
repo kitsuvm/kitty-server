@@ -1,6 +1,6 @@
 //! Graphical user interface for the Kitty Server.
 
-use iced::{Renderer, Subscription, Task, widget::stack};
+use iced::{Renderer, Subscription, Task};
 use kitty_theme_iced::{
     theme::{Theme, default_settings, default_window_settings},
     widget::{application::application_style, window},
@@ -8,8 +8,8 @@ use kitty_theme_iced::{
 };
 
 use crate::{
-    modal::{ModalKind, ModalState},
-    screen::{Screen, ScreenKind, ScreenState},
+    modal::{ModalKind, ModalState, modal},
+    screen::{Screen, ScreenState},
 };
 
 mod modal;
@@ -33,8 +33,8 @@ enum Message {
     Window(window_event::Event),
     /// The search input has changed.
     SearchInputChanged(String),
-    /// The screen needs to be changed.
-    ChangeScreen(ScreenKind),
+    // /// The screen needs to be changed.
+    // ChangeScreen(ScreenKind),
     /// The modal needs to be opened.
     OpenModal(ModalKind),
     /// Close the modal.
@@ -71,10 +71,10 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
             state.screen.set_search_query(query);
             Task::none()
         }
-        Message::ChangeScreen(screen_type) => {
-            state.screen = screen_type.into();
-            Task::none()
-        }
+        // Message::ChangeScreen(screen_type) => {
+        //     state.screen = screen_type.into();
+        //     Task::none()
+        // }
         Message::OpenModal(modal_kind) => {
             state.modal = modal_kind.into();
             Task::none()
@@ -88,7 +88,7 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
 
 /// Renders the view of the application.
 fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
-    let mut window = window(stack![state.screen.content()])
+    let mut window = window(state.screen.content())
         .on_event(Message::Window)
         .window_state(state.window_state);
 
@@ -102,6 +102,10 @@ fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
 
     if let Some(side_width) = state.screen.window_bar_side_width() {
         window = window.window_bar_side_width(side_width)
+    }
+
+    if let Some(modal_content) = modal(&state.modal) {
+        window = window.modal(modal_content);
     }
 
     window

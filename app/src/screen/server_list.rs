@@ -44,6 +44,7 @@ impl Screen for State {
             container(
                 icon_button(icon::ADD_ICON).on_press(Message::OpenModal(ModalKind::ServerAdd)),
             )
+            .style(container::transparent)
             .padding(Padding::from(0).left(8))
             .height(Length::Fill)
             .align_y(Vertical::Bottom)

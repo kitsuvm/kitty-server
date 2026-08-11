@@ -1,7 +1,10 @@
 //! This module defines the [`Screen`] trait and the [`ScreenState`] enum, which represent the different screens in the application.
 
-use iced::{Element, Renderer};
-use kitty_theme_iced::theme::Theme;
+use iced::{
+    Border, Color, Element, Length, Renderer, color,
+    widget::{container, mouse_area},
+};
+use kitty_theme_iced::{theme::Theme, widget::window_background};
 
 use crate::Message;
 
@@ -74,4 +77,30 @@ impl_modal! {
     ModalState, ModalKind {
         ServerAdd(server_add::State),
     }
+}
+
+pub fn modal(state: &ModalState) -> Option<Element<'_, Message, Theme, Renderer>> {
+    state.content().map(|content| {
+        let content_size = content.as_widget().size_hint();
+
+        mouse_area(
+            container(
+                window_background(content)
+                    .width(content_size.width.fluid())
+                    .height(content_size.height.fluid()),
+            )
+            .center(Length::Fill)
+            .style(|theme: &Theme| container::Style {
+                background: Some(color!(0x000000, 0.5).into()),
+                border: Border {
+                    color: Color::TRANSPARENT,
+                    radius: theme.window_radius().into(),
+                    width: theme.window_border_width(),
+                },
+                ..Default::default()
+            }),
+        )
+        .on_press(Message::CloseModal)
+        .into()
+    })
 }
