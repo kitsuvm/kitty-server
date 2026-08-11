@@ -32,7 +32,7 @@ enum Message {
     /// The window needs to be dragged.
     Window(window_event::Event),
     /// The search input has changed.
-    SearchInputChanged(String),
+    ChangedTextInput(usize, String),
     // /// The screen needs to be changed.
     // ChangeScreen(ScreenKind),
     /// The modal needs to be opened.
@@ -69,8 +69,12 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
         Message::Window(event) => {
             window_event::update(&mut state.window_state, event).map(Message::Window)
         }
-        Message::SearchInputChanged(query) => {
-            state.screen.set_search_query(query);
+        Message::ChangedTextInput(id, query) => {
+            if state.modal.is_active() {
+                state.modal.handle_text_input(id, query);
+            } else {
+                state.screen.handle_text_input(id, query);
+            }
             Task::none()
         }
         // Message::ChangeScreen(screen_type) => {

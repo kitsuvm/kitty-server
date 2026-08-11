@@ -31,8 +31,8 @@ impl Screen for State {
         .into()
     }
 
-    fn set_search_query(&mut self, query: String) {
-        self.search_query = query;
+    fn handle_text_input(&mut self, _id: usize, value: String) {
+        self.search_query = value;
     }
 
     fn window_bar_side_width(&self) -> Option<Length> {
@@ -57,7 +57,7 @@ impl Screen for State {
             container(
                 text_input("Search...", &self.search_query)
                     .icon(icon::to_text_input_icon(icon::SEARCH_ICON, 0.0, None))
-                    .on_input(Message::SearchInputChanged),
+                    .on_input(|v| Message::ChangedTextInput(0, v)),
             )
             .max_width(360)
             .padding(Padding::from(0).top(8))

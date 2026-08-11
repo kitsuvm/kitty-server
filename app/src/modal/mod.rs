@@ -14,6 +14,11 @@ pub mod server_add;
 pub trait Modal {
     /// Returns the element to be displayed in the content area of the modal, or `None` if the modal is not currently active.
     fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer>;
+
+    /// Handles a text input change event for the modal.
+    fn handle_text_input(&mut self, _id: usize, _value: String) {
+        // Default implementation does nothing
+    }
 }
 
 macro_rules! impl_modal {
@@ -39,11 +44,27 @@ macro_rules! impl_modal {
         }
 
         impl $state_enum {
-            fn content<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
+            /// Returns whether the modal is currently active (i.e., not `None`).
+            pub fn is_active(&self) -> bool {
+                !matches!(self, Self::None)
+            }
+
+            /// Returns the element to be displayed in the content area of the modal, or `None` if the modal is not currently active.
+            pub fn content<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
                 match self {
                     Self::None => None,
                     $(
                         Self::$variant(state) => Some(state.content()),
+                    )*
+                }
+            }
+
+            /// Handles a text input change event for the modal.
+            pub fn handle_text_input(&mut self, id: usize, value: String) {
+                match self {
+                    Self::None => {},
+                    $(
+                        Self::$variant(state) => state.handle_text_input(id, value),
                     )*
                 }
             }

@@ -12,8 +12,8 @@ pub trait Screen {
     /// Returns the element to be displayed in the content area of the screen.
     fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer>;
 
-    /// Sets the search query for the screen, if applicable.
-    fn set_search_query(&mut self, _query: String) {}
+    /// Handles a text input change event for the screen.
+    fn handle_text_input(&mut self, _id: usize, _value: String) {}
 
     /// Returns the element to be displayed in the opposite side of the window bar.
     fn window_bar_opposite<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
@@ -66,6 +66,15 @@ macro_rules! impl_screen {
                     Self::$default_variant(state) => state.content(),
                     $(
                         Self::$variant(state) => state.content(),
+                    )*
+                }
+            }
+
+            fn handle_text_input(&mut self, id: usize, value: String) {
+                match self {
+                    Self::$default_variant(state) => state.handle_text_input(id, value),
+                    $(
+                        Self::$variant(state) => state.handle_text_input(id, value),
                     )*
                 }
             }
