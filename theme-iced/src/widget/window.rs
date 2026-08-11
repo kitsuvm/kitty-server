@@ -155,6 +155,8 @@ where
     animated: bool,
     /// The animation mode of the window bar buttons.
     animation: Option<iced_anim::animated::Mode>,
+    /// The modal to be shown on top of the window content.
+    modal: Option<Element<'a, Message, Theme, Renderer>>,
 }
 
 impl<'a, Message, Theme, Renderer> Window<'a, Message, Theme, Renderer>
@@ -174,6 +176,7 @@ where
             window_bar_center: None,
             window_bar_opposite: None,
             window_bar_extra: None,
+            modal: None,
             window_bar_buttons: parameters.window_bar_buttons,
             window_bar_left_buttons: parameters.window_bar_left_buttons,
             window_bar_centered: parameters.window_bar_centered,
@@ -256,6 +259,12 @@ where
     /// Sets the size of the icons in the window bar buttons.
     pub fn icon_size(mut self, size: impl Into<Pixels>) -> Self {
         self.icon_size = Some(size.into());
+        self
+    }
+
+    /// Sets the modal to be shown on top of the window content.
+    pub fn modal(mut self, modal: impl Into<Element<'a, Message, Theme, Renderer>>) -> Self {
+        self.modal = Some(modal.into());
         self
     }
 }
@@ -362,6 +371,6 @@ where
             None => resize_area,
         };
 
-        stack![window_content, resize_area].into()
+        stack![window_content, window.modal, resize_area].into()
     }
 }
