@@ -14,12 +14,12 @@ use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::Subscribe
 use crate::{
     modal::{ModalKind, ModalState, modal},
     screen::{Screen, ScreenState},
-    servers::{Servers, ServersState},
+    server::{Servers, ServersState},
 };
 
 mod modal;
 mod screen;
-mod servers;
+mod server;
 
 /// The global state of the application.
 #[derive(Debug, Clone)]
@@ -180,6 +180,25 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
             Task::none()
         }
         Message::SubmitModal => {
+            match &mut state.modal {
+                ModalState::ServerAdd(modal) => {
+                    let mut servers = Servers::load_from_file(Servers::file_path(
+                        &state.global_state.project_dirs,
+                    ))
+                    .unwrap_or_default();
+
+                    servers.ssh_servers.push(modal.as_ref().into());
+                    if let Err(e) =
+                        servers.save_to_file(Servers::file_path(&state.global_state.project_dirs))
+                    {
+                        tracing::error!("Could not save connection configuration file: {}", e);
+                    }
+                }
+                _ => {
+                    tracing::warn!(modal = ?state.modal, "Message::SubmitModal called for modal that does not support submission");
+                }
+            }
+
             state.modal = ModalState::None;
             Task::none()
         }

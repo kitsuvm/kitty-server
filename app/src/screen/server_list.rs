@@ -10,7 +10,7 @@ use kitty_theme_iced::{
     widget::{icon, icon_button},
 };
 
-use crate::{GlobalState, Message, modal::ModalKind, screen::Screen, servers::ServersState};
+use crate::{GlobalState, Message, modal::ModalKind, screen::Screen, server::ServersState};
 
 /// The state of the server list screen.
 #[derive(Debug, Clone, Default)]

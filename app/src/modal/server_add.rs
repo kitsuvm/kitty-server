@@ -6,15 +6,46 @@ use iced::{
 };
 use kitty_theme_iced::{BaseExtended, theme::Theme, widget::button};
 
-use crate::{Message, modal::Modal};
+use crate::{Message, modal::Modal, server::SSHServer};
 
 /// The state of the server list screen.
 #[derive(Debug, Clone, Default)]
 pub struct State {
+    /// The host of the server to be added.
     pub host: String,
+    /// Whether the user has inputted a host.
     pub inputted_host: bool,
+    /// The port of the server to be added.
     pub port: String,
+    /// The username of the server to be added.
     pub username: String,
+    /// The name of the server to be added.
+    pub name: String,
+}
+
+impl AsRef<State> for State {
+    fn as_ref(&self) -> &State {
+        self
+    }
+}
+
+impl From<&State> for SSHServer {
+    fn from(state: &State) -> Self {
+        SSHServer {
+            host: state.host.clone(),
+            port: state.port.parse().ok(),
+            username: if !state.username.is_empty() {
+                Some(state.username.clone())
+            } else {
+                None
+            },
+            name: if !state.name.is_empty() {
+                Some(state.name.clone())
+            } else {
+                None
+            },
+        }
+    }
 }
 
 impl Modal for State {
@@ -32,9 +63,18 @@ impl Modal for State {
                 None
             },
             text("Port"),
-            text_input("22", &self.port).on_input(|v| Message::ChangedTextInput(1, v)),
+            text_input("22", &self.port).on_input(|v| {
+                let port = v.parse::<u16>();
+                if port.is_ok() || v.is_empty() {
+                    Message::ChangedTextInput(1, v)
+                } else {
+                    Message::ChangedTextInput(1, self.port.clone())
+                }
+            }),
             text("Username"),
             text_input("root", &self.username).on_input(|v| Message::ChangedTextInput(2, v)),
+            text("Name"),
+            text_input("My Server", &self.name).on_input(|v| Message::ChangedTextInput(3, v)),
             space().height(10),
             row![
                 button(text("Close").center())
@@ -61,6 +101,7 @@ impl Modal for State {
             }
             1 => self.port = value,
             2 => self.username = value,
+            3 => self.name = value,
             _ => {}
         }
     }

@@ -22,7 +22,7 @@ pub struct SSHServer {
 }
 
 /// The servers in the connection configuration.
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct Servers {
     /// The SSH servers in the connection configuration.
     pub ssh_servers: Vec<SSHServer>,
