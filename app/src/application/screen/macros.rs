@@ -1,36 +1,7 @@
-//! This module defines the [`Screen`] trait and the [`ScreenState`] enum, which represent the different screens in the application.
+//! This module contains helper macros for working with screens.
 
-use iced::{Element, Length, Renderer};
-use kitty_theme_iced::theme::Theme;
-
-use crate::{GlobalState, Message};
-
-pub mod server_list;
-
-/// The trait that defines a screen in the application.
-pub trait Screen {
-    /// Returns the element to be displayed in the content area of the screen.
-    fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer>;
-
-    /// Handles a text input change event for the screen.
-    fn handle_text_input(&mut self, _id: usize, _value: String) {}
-
-    /// Returns the element to be displayed in the opposite side of the window bar.
-    fn window_bar_opposite<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
-        None
-    }
-
-    /// Returns the element to be displayed in the center of the window bar.
-    fn window_bar_center<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
-        None
-    }
-
-    /// Returns the width of the side content of the window bar, if any.
-    fn window_bar_side_width(&self) -> Option<Length> {
-        None
-    }
-}
-
+#[macro_export]
+/// This macro generates a screen state enum and a screen kind enum, along with the necessary implementations for the [`super::Screen`] trait and conversions between the two enums.
 macro_rules! impl_screen {
     (
         $state_enum:ident, $kind_enum:ident {
@@ -60,8 +31,8 @@ macro_rules! impl_screen {
             }
         }
 
-        impl Screen for $state_enum {
-            fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer> {
+        impl crate::application::screen::Screen for $state_enum {
+            fn content<'a>(&'a self, global_state: &GlobalState) -> iced::Element<'a, Message, Theme, Renderer> {
                 match self {
                     Self::$default_variant(state) => state.content(global_state),
                     $(
@@ -79,7 +50,7 @@ macro_rules! impl_screen {
                 }
             }
 
-            fn window_bar_opposite<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
+            fn window_bar_opposite<'a>(&'a self) -> Option<iced::Element<'a, Message, Theme, Renderer>> {
                 match self {
                     Self::$default_variant(state) => state.window_bar_opposite(),
                     $(
@@ -88,7 +59,7 @@ macro_rules! impl_screen {
                 }
             }
 
-            fn window_bar_center<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
+            fn window_bar_center<'a>(&'a self) -> Option<iced::Element<'a, Message, Theme, Renderer>> {
                 match self {
                     Self::$default_variant(state) => state.window_bar_center(),
                     $(
@@ -97,7 +68,7 @@ macro_rules! impl_screen {
                 }
             }
 
-            fn window_bar_side_width(&self) -> Option<Length> {
+            fn window_bar_side_width(&self) -> Option<iced::Length> {
                 match self {
                     Self::$default_variant(state) => state.window_bar_side_width(),
                     $(
@@ -129,11 +100,4 @@ macro_rules! impl_screen {
             }
         }
     };
-}
-
-impl_screen! {
-    ScreenState, ScreenKind {
-        #[default]
-        ServerList(server_list::State),
-    }
 }

@@ -44,18 +44,10 @@ impl Servers {
             e.to_string()
         })? {
             tracing::warn!("Connection configuration file does not exist, creating a new one.");
+
             let default_servers = Self {
                 ssh_servers: Vec::new(),
             };
-
-            fs::create_dir_all(path.as_ref().parent().ok_or_else(|| {
-                tracing::error!("Could not get parent directory of connection configuration file.");
-                "Could not get parent directory of connection configuration file.".to_string()
-            })?)
-            .map_err(|e| {
-                tracing::error!("Could not create connection configuration directory: {}", e);
-                e.to_string()
-            })?;
 
             default_servers.save_to_file(&path).map_err(|e| {
                 tracing::error!("Could not create connection configuration file: {}", e);
@@ -74,8 +66,22 @@ impl Servers {
         })
     }
 
+    /// Load the servers configuration from the project directories.
+    pub fn load_from_project_dirs(project_dirs: &ProjectDirs) -> Result<Self, String> {
+        Self::load_from_file(Self::file_path(project_dirs))
+    }
+
     /// Save the servers configuration to a file.
     pub fn save_to_file(&self, path: impl AsRef<Path>) -> Result<(), String> {
+        fs::create_dir_all(path.as_ref().parent().ok_or_else(|| {
+            tracing::error!("Could not get parent directory of connection configuration file.");
+            "Could not get parent directory of connection configuration file.".to_string()
+        })?)
+        .map_err(|e| {
+            tracing::error!("Could not create connection configuration directory: {}", e);
+            e.to_string()
+        })?;
+
         let data = toml::to_string(self).map_err(|e| {
             tracing::error!("Could not serialize connection configuration: {}", e);
             e.to_string()
@@ -85,6 +91,11 @@ impl Servers {
             tracing::error!("Could not write connection configuration file: {}", e);
             e.to_string()
         })
+    }
+
+    /// Save the servers configuration to the project directories.
+    pub fn save_to_project_dirs(&self, project_dirs: &ProjectDirs) -> Result<(), String> {
+        self.save_to_file(Self::file_path(project_dirs))
     }
 }
 

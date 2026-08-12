@@ -6,7 +6,10 @@ use iced::{
 };
 use kitty_theme_iced::{BaseExtended, theme::Theme, widget::button};
 
-use crate::{Message, modal::Modal, server::SSHServer};
+use crate::{
+    application::{message::Message, modal::Modal},
+    config::servers::SSHServer,
+};
 
 /// The state of the server list screen.
 #[derive(Debug, Clone, Default)]
@@ -51,6 +54,8 @@ impl From<&State> for SSHServer {
 impl Modal for State {
     fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer> {
         column![
+            text("Name"),
+            text_input("My Server", &self.name).on_input(|v| Message::ChangedTextInput(3, v)),
             text("Host"),
             text_input("127.0.0.1", &self.host).on_input(|v| Message::ChangedTextInput(0, v)),
             if self.host.is_empty() && self.inputted_host {
@@ -73,8 +78,6 @@ impl Modal for State {
             }),
             text("Username"),
             text_input("root", &self.username).on_input(|v| Message::ChangedTextInput(2, v)),
-            text("Name"),
-            text_input("My Server", &self.name).on_input(|v| Message::ChangedTextInput(3, v)),
             space().height(10),
             row![
                 button(text("Close").center())
