@@ -3,7 +3,7 @@
 use std::{fs, process::ExitCode};
 
 use directories::ProjectDirs;
-use iced::{Renderer, Subscription, Task};
+use iced::{Renderer, Subscription, Task, application::BootFn};
 use kitty_theme_iced::{
     theme::{Theme, default_settings, default_window_settings},
     widget::{application::application_style, window},
@@ -14,13 +14,22 @@ use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::Subscribe
 use crate::{
     modal::{ModalKind, ModalState, modal},
     screen::{Screen, ScreenState},
+    servers::{Servers, ServersState},
 };
 
 mod modal;
 mod screen;
+mod servers;
+
+/// The global state of the application.
+#[derive(Debug, Clone)]
+struct GlobalState {
+    /// The project directories of the application.
+    pub project_dirs: ProjectDirs,
+}
 
 /// The state of the application.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 struct State {
     /// Whether the window is maximized.
     pub window_state: window_event::State,
@@ -28,6 +37,8 @@ struct State {
     pub screen: ScreenState,
     /// The current modal of the application.
     pub modal: ModalState,
+    /// The global state of the application.
+    pub global_state: GlobalState,
 }
 
 /// The messages of the application.
@@ -45,6 +56,8 @@ enum Message {
     CloseModal,
     /// Submit the modal, closing it.
     SubmitModal,
+    /// The connection configuration has been updated.
+    ServersUpdate(ServersState),
 }
 
 /// The main function of the application.
@@ -98,7 +111,7 @@ fn main() -> ExitCode {
         return ExitCode::from(4);
     }
 
-    if let Err(e) = iced::application::<State, Message, Theme, Renderer>(boot, update, view)
+    if let Err(e) = iced::application::<State, Message, Theme, Renderer>(boot(dirs), update, view)
         .title("Kitty Server")
         .theme(|_: &State| Theme::Dark)
         .style(application_style)
@@ -117,9 +130,26 @@ fn main() -> ExitCode {
     }
 }
 
-/// Boots the application.
-fn boot() -> (State, Task<Message>) {
-    (State::default(), Task::none())
+fn boot(project_dirs: ProjectDirs) -> impl BootFn<State, Message> {
+    tracing::info!("Booting application...");
+    move || {
+        let async_project_dirs = project_dirs.clone();
+
+        (
+            State {
+                window_state: window_event::State::default(),
+                screen: ScreenState::default(),
+                modal: ModalState::None,
+                global_state: GlobalState {
+                    project_dirs: project_dirs.clone(),
+                },
+            },
+            Task::perform(
+                async move { Servers::load_from_file(Servers::file_path(&async_project_dirs)) },
+                |v| Message::ServersUpdate(v.into()),
+            ),
+        )
+    }
 }
 
 /// Updates the state of the application.
@@ -153,13 +183,21 @@ fn update(state: &mut State, message: Message) -> Task<Message> {
             state.modal = ModalState::None;
             Task::none()
         }
+        Message::ServersUpdate(servers) => {
+            match &mut state.screen {
+                ScreenState::ServerList(state) => {
+                    state.servers_state = servers;
+                }
+            }
+            Task::none()
+        }
     }
 }
 
 /// Renders the view of the application.
 fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
     tracing::trace!(?state, "Rendering view...");
-    let mut window = window(state.screen.content())
+    let mut window = window(state.screen.content(&state.global_state))
         .on_event(Message::Window)
         .window_state(state.window_state);
 

@@ -10,25 +10,53 @@ use kitty_theme_iced::{
     widget::{icon, icon_button},
 };
 
-use crate::{Message, modal::ModalKind, screen::Screen};
+use crate::{GlobalState, Message, modal::ModalKind, screen::Screen, servers::ServersState};
 
 /// The state of the server list screen.
 #[derive(Debug, Clone, Default)]
 pub struct State {
     /// The search query entered by the user.
     pub search_query: String,
+    /// The connection state of the application.
+    pub servers_state: ServersState,
 }
 
 impl Screen for State {
-    fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer> {
-        container(
-            text("No Clients Available").style(|theme: &Theme| text::Style {
-                color: Some(theme.extended().background.weaker.text),
-            }),
-        )
-        .style(container::transparent)
-        .center(Length::Fill)
-        .into()
+    fn content<'a>(&'a self, _: &GlobalState) -> Element<'a, Message, Theme, Renderer> {
+        match &self.servers_state {
+            ServersState::Loading => container(text("Loading..."))
+                .center(Length::Fill)
+                .style(container::transparent)
+                .into(),
+            ServersState::Data(server_manager) if server_manager.is_empty() => container(
+                text("No Clients Available").style(|theme: &Theme| text::Style {
+                    color: Some(theme.extended().background.weaker.text),
+                }),
+            )
+            .style(container::transparent)
+            .center(Length::Fill)
+            .into(),
+            ServersState::Data(server_manager) => container(
+                text(format!(
+                    "{} Clients Available",
+                    server_manager.servers.ssh_servers.len()
+                ))
+                .style(|theme: &Theme| text::Style {
+                    color: Some(theme.extended().background.weaker.text),
+                }),
+            )
+            .style(container::transparent)
+            .center(Length::Fill)
+            .into(),
+            ServersState::Error(e) => container(text(format!("Error: {}", e)).style(
+                |theme: &Theme| text::Style {
+                    color: Some(theme.extended().background.weaker.text),
+                },
+            ))
+            .style(container::transparent)
+            .center(Length::Fill)
+            .into(),
+        }
     }
 
     fn handle_text_input(&mut self, _id: usize, value: String) {

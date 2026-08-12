@@ -40,6 +40,8 @@ directories = { workspace = true }
 iced = { workspace = true, features = ["tiny-skia", "linux-theme-detection", "wayland", "tokio"] }
 kitty-server-common = { workspace = true }
 kitty-theme-iced = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+toml = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tracing-appender = { workspace = true }

@@ -3,14 +3,14 @@
 use iced::{Element, Length, Renderer};
 use kitty_theme_iced::theme::Theme;
 
-use crate::Message;
+use crate::{GlobalState, Message};
 
 pub mod server_list;
 
 /// The trait that defines a screen in the application.
 pub trait Screen {
     /// Returns the element to be displayed in the content area of the screen.
-    fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer>;
+    fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer>;
 
     /// Handles a text input change event for the screen.
     fn handle_text_input(&mut self, _id: usize, _value: String) {}
@@ -61,11 +61,11 @@ macro_rules! impl_screen {
         }
 
         impl Screen for $state_enum {
-            fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer> {
+            fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer> {
                 match self {
-                    Self::$default_variant(state) => state.content(),
+                    Self::$default_variant(state) => state.content(global_state),
                     $(
-                        Self::$variant(state) => state.content(),
+                        Self::$variant(state) => state.content(global_state),
                     )*
                 }
             }
