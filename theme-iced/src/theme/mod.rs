@@ -296,6 +296,8 @@ impl window_button::Catalog for Theme {
                     false => theme.window_radius(),
                 };
 
+                let palette = theme.extended();
+
                 button::Style {
                     border: match (status.button_position, status.left_buttons) {
                         (window_button::Position::Left, true) => Border {
@@ -311,9 +313,17 @@ impl window_button::Catalog for Theme {
                         _ => Border::default(),
                     },
                     background: match button_status {
-                        button::Status::Pressed => Some(theme.palette().primary.into()),
-                        button::Status::Hovered => Some(theme.palette().primary.into()),
+                        button::Status::Pressed | button::Status::Hovered => {
+                            Some(palette.primary.base.color.into())
+                        }
                         _ => Some(Color::TRANSPARENT.into()),
+                    },
+                    text_color: match button_status {
+                        button::Status::Disabled => palette.background.weakest.text,
+                        button::Status::Pressed | button::Status::Hovered => {
+                            palette.primary.base.text
+                        }
+                        _ => palette.background.base.text,
                     },
                     ..Default::default()
                 }
@@ -444,6 +454,12 @@ impl window::Catalog for Theme {
         style: impl Fn(&Self) -> container::Style + 'a,
     ) -> <Self as container::Catalog>::Class<'a> {
         Box::new(style) as <Self as container::Catalog>::Class<'a>
+    }
+
+    fn into_text_class<'a>(
+        style: impl Fn(&Self) -> iced_widget::text::Style + 'a,
+    ) -> <Self as iced_widget::text::Catalog>::Class<'a> {
+        Box::new(style) as <Self as iced_widget::text::Catalog>::Class<'a>
     }
 }
 

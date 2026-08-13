@@ -13,7 +13,7 @@ rust-version.workspace = true
 
 [dependencies]
 iced_anim = { workspace = true, features = ["widgets"] }
-iced_core = { workspace = true }
+iced_core = { workspace = true, features = ["advanced"] }
 iced_futures = { workspace = true }
 iced_runtime = { workspace = true }
 iced_widget = { workspace = true, features = ["advanced"] }

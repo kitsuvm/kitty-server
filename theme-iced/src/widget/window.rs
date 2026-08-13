@@ -6,7 +6,7 @@ use iced_widget::{Row, button, column, container, space, stack};
 use crate::{
     BaseExtended,
     renderer::TextRenderer,
-    widget::{icon, window_background, window_bar, window_button, window_resize},
+    widget::{icon, text, window_background, window_bar, window_button, window_resize},
     window_event,
 };
 
@@ -49,6 +49,11 @@ pub trait Catalog:
     fn into_container_class<'a>(
         style: impl Fn(&Self) -> container::Style + 'a,
     ) -> <Self as container::Catalog>::Class<'a>;
+
+    /// Converts a style function into a class for the text.
+    fn into_text_class<'a>(
+        style: impl Fn(&Self) -> iced_widget::text::Style + 'a,
+    ) -> <Self as iced_widget::text::Catalog>::Class<'a>;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -84,7 +89,8 @@ impl WindowButtons {
                 false => icon::MAXIMIZE_ICON,
             },
             Self::Close => icon::CLOSE_ICON,
-        });
+        })
+        .class(Theme::into_text_class(text::default));
 
         if let Some(size) = icon_size {
             icon = icon.size(size);

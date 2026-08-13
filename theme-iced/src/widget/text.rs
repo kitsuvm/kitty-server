@@ -6,10 +6,15 @@ pub use iced_widget::text::{
 
 use crate::BaseExtended;
 
+/// Creates a new [`Style`] with the default color from the theme.
+pub fn default<Theme>(_: &Theme) -> Style {
+    Style { color: None }
+}
+
 /// Creates a new [`Style`] with the danger color from the theme.
 pub fn danger<Theme>(theme: &Theme) -> Style
 where
-    Theme: Catalog + BaseExtended,
+    Theme: BaseExtended,
 {
     Style {
         color: Some(theme.palette_extended().danger.base.color),
