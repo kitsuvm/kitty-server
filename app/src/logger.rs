@@ -1,3 +1,5 @@
+//! Logger module for the Kitty Server application.
+
 use std::fs;
 
 use directories::ProjectDirs;
@@ -6,11 +8,15 @@ use tracing_subscriber::{EnvFilter, Layer, layer::SubscriberExt, util::Subscribe
 
 use crate::Error;
 
+/// Logger struct that holds the project directories and the worker guard for the non-blocking log appender.
 pub struct Logger {
+    /// The project directories for the application.
     pub project_dirs: ProjectDirs,
+    /// The worker guard for the non-blocking log appender.
     _worker_guard: WorkerGuard,
 }
 
+/// Initializes the logger for the Kitty Server application.
 pub fn init() -> Result<Logger, Error> {
     let project_dirs = ProjectDirs::from("com", "KitsuVM", "Kitty Server").ok_or_else(|| {
         eprintln!("Could not determine project directories.");
