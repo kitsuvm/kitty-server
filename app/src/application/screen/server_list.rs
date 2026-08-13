@@ -1,6 +1,5 @@
 //! The server list screen.
 
-use i18n_embed_fl::fl;
 use iced::{
     Element, Length, Padding, Renderer,
     alignment::{Horizontal, Vertical},
@@ -14,6 +13,7 @@ use kitty_theme_iced::{
 use crate::{
     application::{message::Message, modal::ModalKind, screen::Screen, state::GlobalState},
     config::servers::ServersState,
+    t,
 };
 
 /// The state of the server list screen.
@@ -28,15 +28,13 @@ pub struct State {
 impl Screen for State {
     fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer> {
         match &self.servers_state {
-            ServersState::Loading => container(text(fl!(global_state.i18n, "loading")))
+            ServersState::Loading => container(text(t!(global_state, "loading")))
                 .center(Length::Fill)
                 .style(container::transparent)
                 .into(),
             ServersState::Data(server_manager) if server_manager.is_empty() => container(
-                text(fl!(global_state.i18n, "no-client-found")).style(|theme: &Theme| {
-                    text::Style {
-                        color: Some(theme.extended().background.weaker.text),
-                    }
+                text(t!(global_state, "no-client-found")).style(|theme: &Theme| text::Style {
+                    color: Some(theme.extended().background.weaker.text),
                 }),
             )
             .style(container::transparent)
@@ -56,11 +54,11 @@ impl Screen for State {
             .into(),
             ServersState::Error(e) => container(
                 column![
-                    text(fl!(global_state.i18n, "error-occurred")).style(text::danger),
+                    text(t!(global_state, "error-occurred")).style(text::danger),
                     text(format!("{:?}", e)).style(|theme: &Theme| text::Style {
                         color: Some(theme.extended().background.weaker.text),
                     }),
-                    button(text(fl!(global_state.i18n, "retry"))).on_press(Message::Refresh)
+                    button(text(t!(global_state, "retry"))).on_press(Message::Refresh)
                 ]
                 .align_x(Horizontal::Center),
             )
@@ -96,7 +94,7 @@ impl Screen for State {
     ) -> Option<Element<'a, Message, Theme, Renderer>> {
         Some(
             container(
-                text_input(&fl!(global_state.i18n, "search"), &self.search_query)
+                text_input(&t!(global_state, "search"), &self.search_query)
                     .icon(icon::to_text_input_icon(icon::SEARCH_ICON, 0.0, None))
                     .on_input(|v| Message::ChangedTextInput(0, v)),
             )

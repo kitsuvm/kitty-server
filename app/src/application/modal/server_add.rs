@@ -1,15 +1,19 @@
 //! The server add modal.
 
-use i18n_embed_fl::fl;
 use iced::{
     Element, Length, Renderer, Task,
-    widget::{column, row, space, text, text_input},
+    widget::{column, row, space, text_input},
 };
-use kitty_theme_iced::{BaseExtended, theme::Theme, widget::button};
+use kitty_theme_iced::{
+    BaseExtended,
+    theme::Theme,
+    widget::{button, text},
+};
 
 use crate::{
     application::{message::Message, modal::Modal, screen::ScreenState, state::GlobalState},
     config::servers::{SSHServer, Servers, ServersState},
+    t,
 };
 
 /// The state of the server list screen.
@@ -55,25 +59,23 @@ impl From<&State> for SSHServer {
 impl Modal for State {
     fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer> {
         column![
-            text(fl!(global_state.i18n, "server-name")),
-            text_input(&fl!(global_state.i18n, "server-name-example"), &self.name)
+            text(t!(global_state, "server-name")),
+            text_input(&t!(global_state, "server-name-example"), &self.name)
                 .on_input(|v| Message::ChangedTextInput(3, v)),
-            text(fl!(global_state.i18n, "host")),
-            text_input(&fl!(global_state.i18n, "host-example"), &self.host)
+            text(t!(global_state, "host")),
+            text_input(&t!(global_state, "host-example"), &self.host)
                 .on_input(|v| Message::ChangedTextInput(0, v)),
             if self.host.is_empty() && self.inputted_host {
                 Some(
-                    text(fl!(global_state.i18n, "host-empty-error")).style(|theme: &Theme| {
-                        text::Style {
-                            color: Some(theme.palette_extended().danger.base.color),
-                        }
+                    text(t!(global_state, "host-empty-error")).style(|theme: &Theme| text::Style {
+                        color: Some(theme.palette_extended().danger.base.color),
                     }),
                 )
             } else {
                 None
             },
-            text(fl!(global_state.i18n, "port")),
-            text_input(&fl!(global_state.i18n, "port-example"), &self.port).on_input(|v| {
+            text(t!(global_state, "port")),
+            text_input(&t!(global_state, "port-example"), &self.port).on_input(|v| {
                 let port = v.parse::<u16>();
                 if port.is_ok() || v.is_empty() {
                     Message::ChangedTextInput(1, v)
@@ -81,16 +83,20 @@ impl Modal for State {
                     Message::ChangedTextInput(1, self.port.clone())
                 }
             }),
-            text(fl!(global_state.i18n, "username")),
-            text_input(&fl!(global_state.i18n, "username-example"), &self.username)
+            text(t!(global_state, "username")),
+            text_input(&t!(global_state, "username-example"), &self.username)
                 .on_input(|v| Message::ChangedTextInput(2, v)),
             space().height(10),
             row![
-                button(text(fl!(global_state.i18n, "close")).center())
-                    .padding(6)
-                    .on_press(Message::CloseModal)
-                    .width(Length::Fill),
-                button(text(fl!(global_state.i18n, "add")).center())
+                button(
+                    text(t!(global_state, "close"))
+                        .style(text::default)
+                        .center()
+                )
+                .padding(6)
+                .on_press(Message::CloseModal)
+                .width(Length::Fill),
+                button(text(t!(global_state, "add")).style(text::default).center())
                     .padding(6)
                     .on_press(Message::SubmitModal)
                     .width(Length::Fill)
