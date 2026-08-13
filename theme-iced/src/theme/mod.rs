@@ -13,7 +13,10 @@ use iced_widget::{container, scrollable, text, text_input};
 use crate::{
     BaseExtended,
     font::{LATO_BOLD_FONT, fonts},
-    theme::dark::{DARK_EXTERNAL_PALETTE, DARK_PALETTE},
+    theme::{
+        dark::{DARK_EXTERNAL_PALETTE, DARK_PALETTE},
+        light::{LIGHT_EXTENDED_PALETTE, LIGHT_PALETTE},
+    },
     widget::{
         application, button, content, icon_button, sidebar, window, window_background, window_bar,
         window_button,
@@ -21,6 +24,7 @@ use crate::{
 };
 
 mod dark;
+mod light;
 
 /// The default settings for the application.
 pub fn default_settings() -> Settings {
@@ -61,7 +65,7 @@ impl Theme {
     /// Returns the palette for the theme.
     pub fn palette(&self) -> Palette {
         match self {
-            Self::Light => Palette::LIGHT,
+            Self::Light => LIGHT_PALETTE,
             Self::Dark => DARK_PALETTE,
         }
     }
@@ -69,7 +73,7 @@ impl Theme {
     /// Returns the extended palette for the theme.
     pub fn extended(&self) -> Extended {
         match self {
-            Self::Light => Extended::generate(Self::Light.palette()),
+            Self::Light => LIGHT_EXTENDED_PALETTE,
             Self::Dark => DARK_EXTERNAL_PALETTE,
         }
     }
