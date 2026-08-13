@@ -48,7 +48,7 @@ pub fn default_window_settings() -> iced_core::window::Settings {
 pub const THEME_NAME: &str = "kitty";
 
 /// The theme for the application.
-#[derive(Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Theme {
     #[default]
     /// The light theme.
@@ -89,6 +89,15 @@ impl Theme {
         iced_anim::transition::Easing::default()
             .with_duration(Duration::from_millis(150))
             .into()
+    }
+}
+
+impl From<Mode> for Theme {
+    fn from(mode: Mode) -> Self {
+        match mode {
+            Mode::Light | Mode::None => Theme::Light,
+            Mode::Dark => Theme::Dark,
+        }
     }
 }
 
