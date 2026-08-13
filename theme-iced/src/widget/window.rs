@@ -1,9 +1,10 @@
 //! A window widget that can be used to create a custom window with a title bar and buttons.
 
-use iced_core::{Element, Length, Pixels, theme::Base};
+use iced_core::{Element, Length, Pixels};
 use iced_widget::{Row, button, column, container, space, stack};
 
 use crate::{
+    BaseExtended,
     renderer::TextRenderer,
     widget::{icon, window_background, window_bar, window_button, window_resize},
     window_event,
@@ -34,7 +35,7 @@ pub trait Catalog:
     + window_button::Catalog
     + iced_widget::text::Catalog
     + window_bar::Catalog
-    + Base
+    + BaseExtended
 {
     /// Returns the default parameters for the [`Window`] widget.
     fn default_parameters() -> Parameters;

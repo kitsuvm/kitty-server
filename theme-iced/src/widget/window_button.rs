@@ -1,8 +1,8 @@
 //! Custom window button widget.
 
-use iced_core::{Element, Length, color, renderer, theme::Base};
+use iced_core::{Element, Length, renderer};
 
-use crate::widget::button;
+use crate::{BaseExtended, widget::button};
 
 /// The position of the window button.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -228,16 +228,21 @@ pub fn danger<'a, Theme>(
     button_status: button::Status,
 ) -> button::Style
 where
-    Theme: Catalog + Base + 'a,
+    Theme: Catalog + BaseExtended + 'a,
 {
     let base =
         <Theme as Catalog>::style(theme, &<Theme as Catalog>::default(), status, button_status);
+    let palette = theme.palette_extended();
 
     if matches!(
         button_status,
         button::Status::Pressed | button::Status::Hovered
     ) {
-        base.with_background(theme.palette().map_or(color!(0xff000), |p| p.danger))
+        button::Style {
+            background: Some(palette.danger.base.color.into()),
+            text_color: palette.danger.base.text,
+            ..base
+        }
     } else {
         base
     }
