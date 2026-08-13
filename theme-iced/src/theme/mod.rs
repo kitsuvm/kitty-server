@@ -187,7 +187,7 @@ impl iced_widget::button::Catalog for Theme {
                     iced_widget::button::Status::Pressed | iced_widget::button::Status::Hovered => {
                         Some(palette.background.weakest.color.into())
                     }
-                    _ => Some(Color::TRANSPARENT.into()),
+                    _ => Some(palette.background.base.color.into()),
                 },
                 text_color: match status {
                     iced_widget::button::Status::Disabled => palette.background.weakest.text,
@@ -480,18 +480,27 @@ impl icon_button::Catalog for Theme {
     }
 
     fn default<'a>() -> <Self as iced_widget::button::Catalog>::Class<'a> {
-        Box::new(|theme: &Theme, status: button::Status| button::Style {
-            background: match status {
-                button::Status::Pressed | button::Status::Hovered => {
-                    Some(theme.extended().primary.base.color.into())
-                }
-                _ => Some(Color::TRANSPARENT.into()),
-            },
-            border: Border {
-                radius: Radius::from(5),
+        Box::new(|theme: &Theme, status: button::Status| {
+            let palette = theme.extended();
+
+            button::Style {
+                background: match status {
+                    button::Status::Pressed | button::Status::Hovered => {
+                        Some(palette.primary.base.color.into())
+                    }
+                    _ => Some(Color::TRANSPARENT.into()),
+                },
+                text_color: match status {
+                    button::Status::Disabled => palette.background.weakest.text,
+                    button::Status::Pressed | button::Status::Hovered => palette.primary.base.text,
+                    _ => palette.background.base.text,
+                },
+                border: Border {
+                    radius: Radius::from(5),
+                    ..Default::default()
+                },
                 ..Default::default()
-            },
-            ..Default::default()
+            }
         })
     }
 
@@ -501,6 +510,12 @@ impl icon_button::Catalog for Theme {
         status: button::Status,
     ) -> iced_anim::widget::button::Style {
         class(self, status)
+    }
+
+    fn into_text_class<'a>(
+        style: impl Fn(&Self) -> crate::widget::text::Style + 'a,
+    ) -> <Self as crate::widget::text::Catalog>::Class<'a> {
+        Box::new(style) as <Self as crate::widget::text::Catalog>::Class<'a>
     }
 }
 

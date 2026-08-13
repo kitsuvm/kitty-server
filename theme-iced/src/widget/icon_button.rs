@@ -4,11 +4,10 @@ use iced_core::{
     Element, Length, Pixels,
     text::{Fragment, IntoFragment},
 };
-use iced_widget::text;
 
 use crate::{
     renderer::TextRenderer,
-    widget::{button, icon},
+    widget::{button, icon, text},
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -38,6 +37,11 @@ pub trait Catalog: button::Catalog + text::Catalog {
         class: <Self as iced_widget::button::Catalog>::Class<'a>,
         status: button::Status,
     ) -> button::Style;
+
+    /// Converts a style function into a class for the text.
+    fn into_text_class<'a>(
+        style: impl Fn(&Self) -> text::Style + 'a,
+    ) -> <Self as text::Catalog>::Class<'a>;
 }
 
 /// A button with an icon.
@@ -136,7 +140,9 @@ where
     Renderer: TextRenderer + 'a,
 {
     fn from(value: IconButton<'a, Message, Theme, Renderer>) -> Self {
-        let mut content = icon(value.content).center();
+        let mut content = icon(value.content)
+            .center()
+            .class(Theme::into_text_class(text::default));
 
         if let Some(icon_size) = value.icon_size {
             content = content.size(icon_size);
