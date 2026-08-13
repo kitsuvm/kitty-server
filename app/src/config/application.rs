@@ -1,7 +1,7 @@
 //! The connection configuration module.
 
 use std::{
-    fs,
+    fmt, fs,
     path::{Path, PathBuf},
 };
 
@@ -39,6 +39,16 @@ impl From<Theme> for theme::Theme {
     }
 }
 
+impl fmt::Display for Theme {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Theme::System => write!(f, "system"),
+            Theme::Dark => write!(f, "dark"),
+            Theme::Light => write!(f, "light"),
+        }
+    }
+}
+
 /// The language of the application.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Language {
@@ -57,6 +67,16 @@ impl From<Language> for LanguageIdentifier {
             Language::System => "en-US".parse().unwrap(),
             Language::English => "en-US".parse().unwrap(),
             Language::Portuguese => "pt-BR".parse().unwrap(),
+        }
+    }
+}
+
+impl fmt::Display for Language {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Language::System => write!(f, "system"),
+            Language::English => write!(f, "english"),
+            Language::Portuguese => write!(f, "portuguese"),
         }
     }
 }
