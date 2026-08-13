@@ -11,6 +11,7 @@ pub mod content;
 pub mod icon;
 pub mod icon_button;
 pub mod sidebar;
+pub mod text;
 pub mod window;
 pub mod window_background;
 pub mod window_bar;
@@ -123,4 +124,15 @@ where
     Renderer: renderer::TextRenderer + 'a,
 {
     icon_button::IconButton::new(content)
+}
+
+/// Creates a new [`text::Text`] widget with the given content.
+pub fn text<'a, Theme, Renderer>(
+    text: impl text::IntoFragment<'a>,
+) -> text::Text<'a, Theme, Renderer>
+where
+    Theme: text::Catalog + 'a,
+    Renderer: iced_core::text::Renderer,
+{
+    text::Text::new(text)
 }
