@@ -19,13 +19,19 @@ pub trait Screen {
     /// Handles a text input change event for the screen.
     fn handle_text_input(&mut self, _id: usize, _value: String) {}
 
+    /// Refreshes the screen state.
+    fn refresh(&mut self) {}
+
     /// Returns the element to be displayed in the opposite side of the window bar.
     fn window_bar_opposite<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
         None
     }
 
     /// Returns the element to be displayed in the center of the window bar.
-    fn window_bar_center<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {
+    fn window_bar_center<'a>(
+        &'a self,
+        _global_state: &GlobalState,
+    ) -> Option<Element<'a, Message, Theme, Renderer>> {
         None
     }
 

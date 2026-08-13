@@ -17,7 +17,7 @@ pub mod server_add;
 /// The trait that defines a modal in the application.
 pub trait Modal {
     /// Returns the element to be displayed in the content area of the modal, or `None` if the modal is not currently active.
-    fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer>;
+    fn content<'a>(&'a self, _global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer>;
 
     /// Handles a text input change event for the modal.
     fn handle_text_input(&mut self, _id: usize, _value: String) {
@@ -40,8 +40,11 @@ impl_modal! {
     }
 }
 
-pub fn modal(state: &ModalState) -> Option<Element<'_, Message, Theme, Renderer>> {
-    state.content().map(|content| {
+pub fn modal<'a>(
+    state: &'a ModalState,
+    global_state: &'a GlobalState,
+) -> Option<Element<'a, Message, Theme, Renderer>> {
+    state.content(global_state).map(|content| {
         let content_size = content.as_widget().size_hint();
 
         opaque(

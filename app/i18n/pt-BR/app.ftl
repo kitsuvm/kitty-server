@@ -1,0 +1,16 @@
+loading = Carregando...
+no-client-found = Nenhum cliente encontrado
+error-occurred = Ocorreu um erro
+search = Pesquisar...
+retry = Tentar novamente
+server-name = Nome
+server-name-example = Meu Servidor
+host = Host
+host-example = 127.0.0.1
+host-empty-error = Por favor, insira um host
+port = Porta
+port-example = 22
+username = Nome de usuário
+username-example = root
+close = Fechar
+add = Adicionar

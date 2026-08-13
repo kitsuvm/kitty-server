@@ -1,7 +1,8 @@
 //! This module contains the main application logic for the Kitty Server application, including initialization, event handling, and rendering of the user interface.
 
 use directories::ProjectDirs;
-use iced::{Renderer, Subscription};
+use i18n_embed::fluent::FluentLanguageLoader;
+use iced::{Renderer, Subscription, system};
 use kitty_theme_iced::{
     theme::{Theme, default_settings, default_window_settings},
     widget::{application::application_style, window},
@@ -16,6 +17,7 @@ use crate::{
         screen::Screen,
         state::{State, boot},
     },
+    config::application::ApplicationConfig,
 };
 
 pub mod message;
@@ -24,27 +26,38 @@ pub mod screen;
 pub mod state;
 
 /// Initializes the application and runs the main event loop.
-pub fn init(project_dirs: ProjectDirs) -> Result<(), Error> {
-    iced::application::<State, Message, Theme, Renderer>(boot(project_dirs), update, view)
-        .title("Kitty Server")
-        .theme(|_: &State| Theme::Dark)
-        .style(application_style)
-        .subscription(subscription)
-        .settings(iced::Settings {
-            id: Some("kitty-server".into()),
-            ..default_settings()
-        })
-        .window(default_window_settings())
-        .run()
-        .map_err(|e| {
-            tracing::error!(?e, "Application failed to run.");
-            Error::ApplicationInit
-        })
+pub fn init(
+    project_dirs: ProjectDirs,
+    i18n: FluentLanguageLoader,
+    app_config: ApplicationConfig,
+) -> Result<(), Error> {
+    iced::application::<State, Message, Theme, Renderer>(
+        boot(project_dirs, i18n, app_config),
+        update,
+        view,
+    )
+    .title("Kitty Server")
+    .theme(|state: &State| state.theme)
+    .style(application_style)
+    .subscription(subscription)
+    .settings(iced::Settings {
+        id: Some("kitty-server".into()),
+        ..default_settings()
+    })
+    .window(default_window_settings())
+    .run()
+    .map_err(|e| {
+        tracing::error!(?e, "Application failed to run.");
+        Error::ApplicationInit
+    })
 }
 
 /// Subscribes to window resize events.
 fn subscription(_: &State) -> Subscription<Message> {
-    window_event::subscription().map(Message::Window)
+    Subscription::batch([
+        window_event::subscription().map(Message::Window),
+        system::theme_changes().map(Message::ChangedThemeMode),
+    ])
 }
 
 /// Renders the view of the application based on the current state.
@@ -58,7 +71,7 @@ fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
         window = window.window_bar_opposite(opposite);
     }
 
-    if let Some(center) = state.screen.window_bar_center() {
+    if let Some(center) = state.screen.window_bar_center(&state.global_state) {
         window = window.window_bar_center(center);
     }
 
@@ -66,7 +79,7 @@ fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
         window = window.window_bar_side_width(side_width)
     }
 
-    if let Some(modal_content) = modal(&state.modal) {
+    if let Some(modal_content) = modal(&state.modal, &state.global_state) {
         window = window.modal(modal_content);
     }
 

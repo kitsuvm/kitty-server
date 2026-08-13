@@ -2,8 +2,14 @@
 
 use std::process::{ExitCode, Termination};
 
+use clap::Parser;
+
+use crate::config::application::ApplicationConfig;
+
 mod application;
+mod cli;
 mod config;
+mod i18n;
 mod logger;
 
 /// The error codes for the application.
@@ -20,6 +26,8 @@ pub enum Error {
     TracingInit = 4,
     /// The application failed to initialize the application.
     ApplicationInit = 5,
+    /// The application failed to initialize the i18n system.
+    I18nInit = 6,
 }
 
 impl Termination for Error {
@@ -31,5 +39,11 @@ impl Termination for Error {
 /// The main function of the application.
 fn main() -> Result<(), Error> {
     let logger = logger::init()?;
-    application::init(logger.project_dirs)
+    let cli = cli::Cli::parse();
+    let app_config =
+        ApplicationConfig::load_from_project_dirs(&logger.project_dirs).override_with_cli(&cli);
+
+    let i18n = i18n::init(app_config.language)?;
+
+    application::init(logger.project_dirs, i18n, app_config)
 }

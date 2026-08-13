@@ -1,5 +1,6 @@
 //! The server add modal.
 
+use i18n_embed_fl::fl;
 use iced::{
     Element, Length, Renderer, Task,
     widget::{column, row, space, text, text_input},
@@ -52,23 +53,27 @@ impl From<&State> for SSHServer {
 }
 
 impl Modal for State {
-    fn content<'a>(&'a self) -> Element<'a, Message, Theme, Renderer> {
+    fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer> {
         column![
-            text("Name"),
-            text_input("My Server", &self.name).on_input(|v| Message::ChangedTextInput(3, v)),
-            text("Host"),
-            text_input("127.0.0.1", &self.host).on_input(|v| Message::ChangedTextInput(0, v)),
+            text(fl!(global_state.i18n, "server-name")),
+            text_input(&fl!(global_state.i18n, "server-name-example"), &self.name)
+                .on_input(|v| Message::ChangedTextInput(3, v)),
+            text(fl!(global_state.i18n, "host")),
+            text_input(&fl!(global_state.i18n, "host-example"), &self.host)
+                .on_input(|v| Message::ChangedTextInput(0, v)),
             if self.host.is_empty() && self.inputted_host {
                 Some(
-                    text("Please enter a host").style(|theme: &Theme| text::Style {
-                        color: Some(theme.palette_extended().danger.base.color),
+                    text(fl!(global_state.i18n, "host-empty-error")).style(|theme: &Theme| {
+                        text::Style {
+                            color: Some(theme.palette_extended().danger.base.color),
+                        }
                     }),
                 )
             } else {
                 None
             },
-            text("Port"),
-            text_input("22", &self.port).on_input(|v| {
+            text(fl!(global_state.i18n, "port")),
+            text_input(&fl!(global_state.i18n, "port-example"), &self.port).on_input(|v| {
                 let port = v.parse::<u16>();
                 if port.is_ok() || v.is_empty() {
                     Message::ChangedTextInput(1, v)
@@ -76,15 +81,16 @@ impl Modal for State {
                     Message::ChangedTextInput(1, self.port.clone())
                 }
             }),
-            text("Username"),
-            text_input("root", &self.username).on_input(|v| Message::ChangedTextInput(2, v)),
+            text(fl!(global_state.i18n, "username")),
+            text_input(&fl!(global_state.i18n, "username-example"), &self.username)
+                .on_input(|v| Message::ChangedTextInput(2, v)),
             space().height(10),
             row![
-                button(text("Close").center())
+                button(text(fl!(global_state.i18n, "close")).center())
                     .padding(6)
                     .on_press(Message::CloseModal)
                     .width(Length::Fill),
-                button(text("Add").center())
+                button(text(fl!(global_state.i18n, "add")).center())
                     .padding(6)
                     .on_press(Message::SubmitModal)
                     .width(Length::Fill)

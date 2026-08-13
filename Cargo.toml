@@ -26,6 +26,8 @@ futures-sink = "0.3.33"
 kitty-server-common = { path = "common", version = "0.0.1-alpha.1" }
 kitty-server-runtime = { path = "runtime", version = "0.0.1-alpha.1" }
 kitty-theme-iced = { path = "theme-iced", version = "0.0.1-alpha.1" }
+i18n-embed = "0.16.0"
+i18n-embed-fl = "0.10.1"
 iced = { version = "0.14.0", default-features = false }
 iced_anim = { version = "0.3.0", default-features = false }
 iced_core = { version = "0.14.0", default-features = false }
@@ -34,6 +36,7 @@ iced_runtime = { version = "0.14.0", default-features = false }
 iced_widget = { version = "0.14.0", default-features = false }
 prost = "0.14.4"
 prost-build = "0.14.4"
+rust-embed = "8.12.0"
 serde = "1.0.229"
 sysinfo = "0.39.6"
 tokio = "1.53.1"

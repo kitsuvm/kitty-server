@@ -1,4 +1,4 @@
-use iced::Task;
+use iced::{Task, theme::Mode};
 use kitty_theme_iced::window_event;
 
 use crate::{
@@ -15,6 +15,8 @@ use crate::{
 pub enum Message {
     /// The window needs to be dragged.
     Window(window_event::Event),
+    /// The theme has changed.
+    ChangedThemeMode(Mode),
     /// The search input has changed.
     ChangedTextInput(usize, String),
     // /// The screen needs to be changed.
@@ -27,6 +29,8 @@ pub enum Message {
     SubmitModal,
     /// The connection configuration has been updated.
     ServersUpdate(ServersState),
+    /// Refresh the screen state.
+    Refresh,
 }
 
 /// Updates the state of the application.
@@ -35,6 +39,13 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
     match message {
         Message::Window(event) => {
             window_event::update(&mut state.window_state, event).map(Message::Window)
+        }
+        Message::ChangedThemeMode(mode) => {
+            if state.global_state.app_config.theme.is_system() {
+                state.theme = mode.into();
+            }
+
+            Task::none()
         }
         Message::ChangedTextInput(id, query) => {
             if state.modal.is_active() {
@@ -71,6 +82,10 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                     state.servers_state = servers;
                 }
             }
+            Task::none()
+        }
+        Message::Refresh => {
+            state.screen.refresh();
             Task::none()
         }
     }

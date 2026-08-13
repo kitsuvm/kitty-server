@@ -37,9 +37,12 @@ winres = { workspace = true }
 [dependencies]
 clap = { workspace = true, features = ["derive"] }
 directories = { workspace = true }
+i18n-embed = { workspace = true, features = ["desktop-requester", "fluent-system"] }
+i18n-embed-fl = { workspace = true }
 iced = { workspace = true, features = ["tiny-skia", "linux-theme-detection", "wayland", "tokio"] }
 kitty-server-common = { workspace = true }
 kitty-theme-iced = { workspace = true }
+rust-embed = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 toml = { workspace = true }
 tracing = { workspace = true }

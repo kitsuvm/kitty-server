@@ -1,0 +1,6 @@
+fallback_language = "en-US"
+supported_languages = ["en-US", "pt-BR"]
+
+[fluent]
+domain = "app"
+assets_dir = "i18n"

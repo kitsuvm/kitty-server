@@ -31,11 +31,11 @@ macro_rules! impl_modal {
             }
 
             /// Returns the element to be displayed in the content area of the modal, or `None` if the modal is not currently active.
-            pub fn content<'a>(&'a self) -> Option<iced::Element<'a, Message, Theme, Renderer>> {
+            pub fn content<'a>(&'a self, global_state: &GlobalState) -> Option<iced::Element<'a, Message, Theme, Renderer>> {
                 match self {
                     Self::None => None,
                     $(
-                        Self::$variant(state) => Some(state.content()),
+                        Self::$variant(state) => Some(state.content(global_state)),
                     )*
                 }
             }

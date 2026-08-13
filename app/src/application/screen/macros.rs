@@ -32,7 +32,7 @@ macro_rules! impl_screen {
         }
 
         impl crate::application::screen::Screen for $state_enum {
-            fn content<'a>(&'a self, global_state: &GlobalState) -> iced::Element<'a, Message, Theme, Renderer> {
+            fn content<'a>(&'a self, global_state: &crate::application::state::GlobalState) -> iced::Element<'a, Message, Theme, Renderer> {
                 match self {
                     Self::$default_variant(state) => state.content(global_state),
                     $(
@@ -59,11 +59,11 @@ macro_rules! impl_screen {
                 }
             }
 
-            fn window_bar_center<'a>(&'a self) -> Option<iced::Element<'a, Message, Theme, Renderer>> {
+            fn window_bar_center<'a>(&'a self, global_state: &crate::application::state::GlobalState) -> Option<iced::Element<'a, Message, Theme, Renderer>> {
                 match self {
-                    Self::$default_variant(state) => state.window_bar_center(),
+                    Self::$default_variant(state) => state.window_bar_center(global_state),
                     $(
-                        Self::$variant(state) => state.window_bar_center(),
+                        Self::$variant(state) => state.window_bar_center(global_state),
                     )*
                 }
             }
