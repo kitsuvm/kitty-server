@@ -73,12 +73,12 @@ pub fn boot(
 /// A macro for translating messages using the i18n system.
 macro_rules! t {
     // 1. Basic translation without arguments: t!(state, "message-id")
-    ($state:expr, $message_id:expr) => {
+    ($state:expr, $message_id:literal) => {
         i18n_embed_fl::fl!($state.i18n.borrow(), $message_id)
     };
 
     // 2. Translation with arguments (supports named `key = val`, positional `val`, or expressions)
-    ($state:expr, $message_id:expr, $($args:tt)*) => {
+    ($state:expr, $message_id:literal, $($args:tt)*) => {
         i18n_embed_fl::fl!($state.i18n.borrow(), $message_id, $($args)*)
     };
 }

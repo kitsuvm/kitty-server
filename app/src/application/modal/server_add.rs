@@ -60,22 +60,24 @@ impl Modal for State {
     fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer> {
         column![
             text(t!(global_state, "server-name")),
-            text_input(&t!(global_state, "server-name-example"), &self.name)
+            text_input(&t!(global_state, "server-name", "example"), &self.name)
                 .on_input(|v| Message::ChangedTextInput(3, v)),
             text(t!(global_state, "host")),
-            text_input(&t!(global_state, "host-example"), &self.host)
+            text_input(&t!(global_state, "host", "example"), &self.host)
                 .on_input(|v| Message::ChangedTextInput(0, v)),
             if self.host.is_empty() && self.inputted_host {
                 Some(
-                    text(t!(global_state, "host-empty-error")).style(|theme: &Theme| text::Style {
-                        color: Some(theme.palette_extended().danger.base.color),
+                    text(t!(global_state, "host", "empty-error")).style(|theme: &Theme| {
+                        text::Style {
+                            color: Some(theme.palette_extended().danger.base.color),
+                        }
                     }),
                 )
             } else {
                 None
             },
             text(t!(global_state, "port")),
-            text_input(&t!(global_state, "port-example"), &self.port).on_input(|v| {
+            text_input(&t!(global_state, "port", "example"), &self.port).on_input(|v| {
                 let port = v.parse::<u16>();
                 if port.is_ok() || v.is_empty() {
                     Message::ChangedTextInput(1, v)
@@ -84,7 +86,7 @@ impl Modal for State {
                 }
             }),
             text(t!(global_state, "username")),
-            text_input(&t!(global_state, "username-example"), &self.username)
+            text_input(&t!(global_state, "username", "example"), &self.username)
                 .on_input(|v| Message::ChangedTextInput(2, v)),
             space().height(10),
             row![
