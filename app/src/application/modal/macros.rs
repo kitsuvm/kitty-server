@@ -49,6 +49,16 @@ macro_rules! impl_modal {
                     )*
                 }
             }
+
+            /// Handles the submission of the modal.
+            pub fn handle_submit(&mut self, global_state: &mut crate::application::state::GlobalState, screen: &mut crate::application::screen::ScreenState) -> (bool, iced::Task<crate::application::Message>) {
+                match self {
+                    Self::None => (true, iced::Task::none()),
+                    $(
+                        Self::$variant(state) => state.handle_submit(global_state, screen),
+                    )*
+                }
+            }
         }
 
         impl From<$kind_enum> for $state_enum {

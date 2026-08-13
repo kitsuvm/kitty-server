@@ -7,7 +7,7 @@ use crate::{
         screen::{Screen, ScreenState},
         state::State,
     },
-    config::servers::{Servers, ServersState},
+    config::servers::ServersState,
 };
 
 /// The messages of the application.
@@ -57,59 +57,13 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             Task::none()
         }
         Message::SubmitModal => {
-            match &mut state.modal {
-                ModalState::ServerAdd(modal) => {
-                    if modal.host.is_empty() {
-                        tracing::warn!("Host is empty, cannot submit modal");
-                        modal.inputted_host = true;
-                        return Task::none();
-                    }
-
-                    let mut servers =
-                        Servers::load_from_project_dirs(&state.global_state.project_dirs)
-                            .unwrap_or_default();
-
-                    servers.ssh_servers.push(modal.as_ref().into());
-
-                    let current_servers = match &mut state.screen {
-                        ScreenState::ServerList(state) => match &state.servers_state {
-                            ServersState::Data(servers) => Some(servers.clone()),
-                            _ => None,
-                        },
-                    };
-
-                    let servers_state = match servers
-                        .save_to_project_dirs(&state.global_state.project_dirs)
-                    {
-                        Ok(_) => {
-                            tracing::info!("Saved connection configuration file, reloading...");
-                            ServersState::Data(match current_servers {
-                                Some(mut v) => {
-                                    v.servers = servers;
-                                    v
-                                }
-                                None => servers.into(),
-                            })
-                        }
-                        Err(e) => {
-                            tracing::error!("Could not save connection configuration file: {}", e);
-                            ServersState::Error(e)
-                        }
-                    };
-
-                    match &mut state.screen {
-                        ScreenState::ServerList(state) => {
-                            state.servers_state = servers_state;
-                        }
-                    }
-                }
-                _ => {
-                    tracing::warn!(modal = ?state.modal, "Message::SubmitModal called for modal that does not support submission");
-                }
+            let (close_modal, task) = state
+                .modal
+                .handle_submit(&mut state.global_state, &mut state.screen);
+            if close_modal {
+                state.modal = ModalState::None;
             }
-
-            state.modal = ModalState::None;
-            Task::none()
+            task
         }
         Message::ServersUpdate(servers) => {
             match &mut state.screen {

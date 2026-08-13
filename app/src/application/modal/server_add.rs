@@ -1,14 +1,14 @@
 //! The server add modal.
 
 use iced::{
-    Element, Length, Renderer,
+    Element, Length, Renderer, Task,
     widget::{column, row, space, text, text_input},
 };
 use kitty_theme_iced::{BaseExtended, theme::Theme, widget::button};
 
 use crate::{
-    application::{message::Message, modal::Modal},
-    config::servers::SSHServer,
+    application::{message::Message, modal::Modal, screen::ScreenState, state::GlobalState},
+    config::servers::{SSHServer, Servers, ServersState},
 };
 
 /// The state of the server list screen.
@@ -107,5 +107,54 @@ impl Modal for State {
             3 => self.name = value,
             _ => {}
         }
+    }
+
+    fn handle_submit(
+        &mut self,
+        global_state: &mut GlobalState,
+        screen: &mut ScreenState,
+    ) -> (bool, Task<Message>) {
+        if self.host.is_empty() {
+            tracing::warn!("Host is empty, cannot submit modal");
+            self.inputted_host = true;
+            return (false, Task::none());
+        }
+
+        let mut servers =
+            Servers::load_from_project_dirs(&global_state.project_dirs).unwrap_or_default();
+
+        servers.ssh_servers.push(self.as_ref().into());
+
+        let current_servers = match screen {
+            ScreenState::ServerList(state) => match &state.servers_state {
+                ServersState::Data(servers) => Some(servers.clone()),
+                _ => None,
+            },
+        };
+
+        let servers_state = match servers.save_to_project_dirs(&global_state.project_dirs) {
+            Ok(_) => {
+                tracing::info!("Saved connection configuration file, reloading...");
+                ServersState::Data(match current_servers {
+                    Some(mut v) => {
+                        v.servers = servers;
+                        v
+                    }
+                    None => servers.into(),
+                })
+            }
+            Err(e) => {
+                tracing::error!("Could not save connection configuration file: {}", e);
+                ServersState::Error(e)
+            }
+        };
+
+        match screen {
+            ScreenState::ServerList(state) => {
+                state.servers_state = servers_state;
+            }
+        };
+
+        (true, Task::none())
     }
 }

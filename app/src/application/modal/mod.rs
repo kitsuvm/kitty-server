@@ -1,12 +1,15 @@
 //! This module defines the [`Screen`] trait and the [`ScreenState`] enum, which represent the different screens in the application.
 
 use iced::{
-    Border, Color, Element, Length, Renderer, color,
+    Border, Color, Element, Length, Renderer, Task, color,
     widget::{container, opaque},
 };
 use kitty_theme_iced::{theme::Theme, widget::window_background};
 
-use crate::{application::message::Message, impl_modal};
+use crate::{
+    application::{message::Message, screen::ScreenState, state::GlobalState},
+    impl_modal,
+};
 
 pub mod macros;
 pub mod server_add;
@@ -19,6 +22,15 @@ pub trait Modal {
     /// Handles a text input change event for the modal.
     fn handle_text_input(&mut self, _id: usize, _value: String) {
         // Default implementation does nothing
+    }
+
+    /// Handles the submission of the modal.
+    fn handle_submit(
+        &mut self,
+        _global_state: &mut GlobalState,
+        _screen: &mut ScreenState,
+    ) -> (bool, Task<Message>) {
+        (false, Task::none())
     }
 }
 
