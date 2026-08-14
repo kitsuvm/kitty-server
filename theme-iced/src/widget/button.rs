@@ -186,6 +186,43 @@ where
     }
 }
 
+/// Returns a default button style for the given theme and status.
+pub fn default<'a, Theme>(theme: &Theme, status: Status) -> Style
+where
+    Theme: BaseExtended + Catalog + 'a,
+{
+    let default_class = <Theme as button::Catalog>::default();
+    <Theme as button::Catalog>::style(theme, &default_class, status)
+}
+
+/// Returns a alternative button style for the given theme and status.
+pub fn alt<'a, Theme>(theme: &Theme, status: Status) -> Style
+where
+    Theme: BaseExtended + Catalog + 'a,
+{
+    let pallete = theme.palette_extended();
+    let default_class = <Theme as button::Catalog>::default();
+    let default_style = <Theme as button::Catalog>::style(theme, &default_class, status);
+
+    match status {
+        Status::Active => Style {
+            background: Some(pallete.background.weakest.color.into()),
+            text_color: pallete.background.base.text,
+            ..default_style
+        },
+        Status::Hovered | Status::Pressed => Style {
+            background: Some(pallete.background.neutral.color.into()),
+            text_color: pallete.background.base.text,
+            ..default_style
+        },
+        Status::Disabled => Style {
+            background: Some(pallete.background.strongest.color.into()),
+            text_color: pallete.background.base.text,
+            ..default_style
+        },
+    }
+}
+
 /// Returns a primary button style for the given theme and status.
 pub fn primary<'a, Theme>(theme: &Theme, status: Status) -> Style
 where
