@@ -9,6 +9,7 @@ use kitty_theme_iced::{
     theme::Theme,
     widget::{button, text},
 };
+use whoami::username;
 
 use crate::{
     application::{
@@ -22,7 +23,7 @@ use crate::{
 };
 
 /// The state of the server list screen.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct State {
     /// The host of the server to be added.
     pub host: String,
@@ -34,6 +35,25 @@ pub struct State {
     pub username: String,
     /// The name of the server to be added.
     pub name: String,
+    /// The current username of the user.
+    pub current_username: Option<String>,
+}
+
+impl Default for State {
+    fn default() -> Self {
+        Self {
+            host: String::new(),
+            inputted_host: false,
+            port: String::new(),
+            username: String::new(),
+            name: String::new(),
+            current_username: username()
+                .inspect_err(|e| {
+                    tracing::error!(?e, "Failed to get current username");
+                })
+                .ok(),
+        }
+    }
 }
 
 impl AsRef<State> for State {
@@ -91,8 +111,13 @@ impl Modal for State {
                 }
             }),
             text(t!(global_state, "username")),
-            text_input(&t!(global_state, "username", "example"), &self.username)
-                .on_input(|v| Message::ChangedTextInput(2, v)),
+            text_input(
+                self.current_username
+                    .as_ref()
+                    .unwrap_or(&t!(global_state, "username", "example")),
+                &self.username
+            )
+            .on_input(|v| Message::ChangedTextInput(2, v)),
             space().height(10),
             row![
                 button(
