@@ -5,10 +5,13 @@ use crate::{
     application::{
         modal::{ModalKind, ModalState},
         screen::{Screen, ScreenState},
-        state::State,
+        state::{Lazy, State},
     },
-    config::{self, servers::ServersState},
     i18n::change_language,
+    resources::{
+        app_config::{AppConfig, AppLanguage, AppTheme},
+        hosts::HostsManager,
+    },
 };
 
 /// The messages of the application.
@@ -28,14 +31,14 @@ pub enum Message {
     CloseModal,
     /// Submit the modal, closing it.
     SubmitModal,
-    /// The connection configuration has been updated.
-    ServersUpdate(ServersState),
+    /// The
+    LoadedHostsManager(Lazy<HostsManager>),
     /// Refresh the screen state.
     Refresh,
     /// The application theme configuration has changed.
-    ChangeThemeConfig(config::application::Theme),
+    ChangeAppTheme(AppTheme),
     /// The application language configuration has changed.
-    ChangeLanguageConfig(config::application::Language),
+    ChangeAppLanguage(AppLanguage),
 }
 
 /// Updates the state of the application.
@@ -81,10 +84,10 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             }
             task
         }
-        Message::ServersUpdate(servers) => {
+        Message::LoadedHostsManager(hosts_manager) => {
             match &mut state.screen {
                 ScreenState::ServerList(state) => {
-                    state.servers_state = servers;
+                    state.internal = hosts_manager;
                 }
             }
             Task::none()
@@ -93,7 +96,7 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
             state.screen.refresh();
             Task::none()
         }
-        Message::ChangeThemeConfig(theme) => {
+        Message::ChangeAppTheme(theme) => {
             state.global_state.app_config.theme = theme;
 
             let task = if !state.global_state.app_config.theme.is_system() {
@@ -103,20 +106,28 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
                 system::theme().map(Message::ChangedThemeMode)
             };
 
-            let _ = state
+            if let Err(e) = state
                 .global_state
-                .app_config
-                .save_to_project_dirs(&state.global_state.project_dirs);
+                .resource_manager
+                .save(&state.global_state.app_config)
+            {
+                tracing::error!(?e, "Failed to save application configuration.");
+            }
 
             task
         }
-        Message::ChangeLanguageConfig(language) => {
-            state.global_state.app_config.language = language;
+        Message::ChangeAppLanguage(language) => {
             let _ = change_language(&state.global_state.i18n, language);
-            let _ = state
+
+            state.global_state.app_config.language = language;
+
+            if let Err(e) = state
                 .global_state
-                .app_config
-                .save_to_project_dirs(&state.global_state.project_dirs);
+                .resource_manager
+                .save(&state.global_state.app_config)
+            {
+                tracing::error!(?e, "Failed to save application configuration.");
+            }
             Task::none()
         }
     }

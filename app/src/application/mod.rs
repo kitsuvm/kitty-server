@@ -1,6 +1,5 @@
 //! This module contains the main application logic for the Kitty Server application, including initialization, event handling, and rendering of the user interface.
 
-use directories::ProjectDirs;
 use iced::{Length, Padding, Renderer, Subscription, system, widget::container};
 use kitty_theme_iced::{
     theme::{Theme, default_settings, default_window_settings},
@@ -16,8 +15,11 @@ use crate::{
         screen::Screen,
         state::{State, boot},
     },
-    config::application::ApplicationConfig,
     i18n::I18n,
+    resources::{
+        ResourceManager,
+        app_config::{AppConfig, AppTheme},
+    },
 };
 
 pub mod message;
@@ -27,12 +29,13 @@ pub mod state;
 
 /// Initializes the application and runs the main event loop.
 pub fn init(
-    project_dirs: ProjectDirs,
+    resource_manager: ResourceManager,
     i18n: I18n,
-    app_config: ApplicationConfig,
+    app_config: AppConfig,
+    theme: AppTheme,
 ) -> Result<(), Error> {
     iced::application::<State, Message, Theme, Renderer>(
-        boot(project_dirs, i18n, app_config),
+        boot(resource_manager, i18n, app_config, theme),
         update,
         view,
     )

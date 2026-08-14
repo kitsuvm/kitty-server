@@ -8,7 +8,7 @@ use i18n_embed::{
 };
 use rust_embed::Embed;
 
-use crate::{Error, config::application::Language};
+use crate::{Error, resources::app_config::AppLanguage};
 
 /// A type alias for a reference-counted, mutable `FluentLanguageLoader`.
 pub type I18n = Rc<RefCell<FluentLanguageLoader>>;
@@ -19,10 +19,10 @@ pub type I18n = Rc<RefCell<FluentLanguageLoader>>;
 pub struct Locales;
 
 /// Initializes the i18n system;
-pub fn init(language: Language) -> Result<I18n, Error> {
+pub fn init(language: AppLanguage) -> Result<I18n, Error> {
     let loader = fluent_language_loader!();
 
-    let requested_languages = if language == Language::System {
+    let requested_languages = if language == AppLanguage::System {
         DesktopLanguageRequester::requested_languages()
     } else {
         vec![language.into()]
@@ -37,8 +37,8 @@ pub fn init(language: Language) -> Result<I18n, Error> {
 }
 
 /// Changes the language of the application at runtime.
-pub fn change_language(loader: &I18n, language: Language) -> Result<(), Error> {
-    let requested_languages = if language == Language::System {
+pub fn change_language(loader: &I18n, language: AppLanguage) -> Result<(), Error> {
+    let requested_languages = if language == AppLanguage::System {
         DesktopLanguageRequester::requested_languages()
     } else {
         vec![language.into()]

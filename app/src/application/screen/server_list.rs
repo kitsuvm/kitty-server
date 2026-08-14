@@ -11,8 +11,13 @@ use kitty_theme_iced::{
 };
 
 use crate::{
-    application::{message::Message, modal::ModalKind, screen::Screen, state::GlobalState},
-    config::servers::ServersState,
+    application::{
+        message::Message,
+        modal::ModalKind,
+        screen::Screen,
+        state::{GlobalState, Lazy},
+    },
+    resources::hosts::HostsManager,
     t,
 };
 
@@ -22,17 +27,17 @@ pub struct State {
     /// The search query entered by the user.
     pub search_query: String,
     /// The connection state of the application.
-    pub servers_state: ServersState,
+    pub internal: Lazy<HostsManager>,
 }
 
 impl Screen for State {
     fn content<'a>(&'a self, global_state: &GlobalState) -> Element<'a, Message, Theme, Renderer> {
-        match &self.servers_state {
-            ServersState::Loading => container(text(t!(global_state, "loading")))
+        match &self.internal {
+            Lazy::Loading => container(text(t!(global_state, "loading")))
                 .center(Length::Fill)
                 .style(container::transparent)
                 .into(),
-            ServersState::Data(server_manager) if server_manager.is_empty() => container(
+            Lazy::Data(hosts_manager) if hosts_manager.is_empty() => container(
                 text(t!(global_state, "no-client-found")).style(|theme: &Theme| text::Style {
                     color: Some(theme.extended().background.weaker.text),
                 }),
@@ -40,19 +45,15 @@ impl Screen for State {
             .style(container::transparent)
             .center(Length::Fill)
             .into(),
-            ServersState::Data(server_manager) => container(
-                text(format!(
-                    "{} Clients Available",
-                    server_manager.servers.ssh_servers.len()
-                ))
-                .style(|theme: &Theme| text::Style {
+            Lazy::Data(hosts_manager) => container(text(format!("Has clients")).style(
+                |theme: &Theme| text::Style {
                     color: Some(theme.extended().background.weaker.text),
-                }),
-            )
+                },
+            ))
             .style(container::transparent)
             .center(Length::Fill)
             .into(),
-            ServersState::Error(e) => container(
+            Lazy::Error(e) => container(
                 column![
                     text(t!(global_state, "error-occurred")).style(text::danger),
                     text(format!("{:?}", e)).style(|theme: &Theme| text::Style {

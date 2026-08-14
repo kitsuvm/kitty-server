@@ -1,7 +1,9 @@
 use clap::{Parser, ValueEnum};
 
+use crate::resources::app_config::{AppLanguage, AppTheme};
+
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, ValueEnum)]
-pub enum Theme {
+pub enum CliTheme {
     /// Use the system theme.
     #[default]
     System,
@@ -11,18 +13,18 @@ pub enum Theme {
     Light,
 }
 
-impl From<Theme> for crate::config::application::Theme {
-    fn from(value: Theme) -> Self {
+impl From<CliTheme> for AppTheme {
+    fn from(value: CliTheme) -> Self {
         match value {
-            Theme::System => Self::System,
-            Theme::Dark => Self::Dark,
-            Theme::Light => Self::Light,
+            CliTheme::System => Self::System,
+            CliTheme::Dark => Self::Dark,
+            CliTheme::Light => Self::Light,
         }
     }
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, ValueEnum)]
-pub enum Language {
+pub enum CliLanguage {
     /// Use the system language.
     #[default]
     System,
@@ -32,12 +34,12 @@ pub enum Language {
     Portuguese,
 }
 
-impl From<Language> for crate::config::application::Language {
-    fn from(value: Language) -> Self {
+impl From<CliLanguage> for AppLanguage {
+    fn from(value: CliLanguage) -> Self {
         match value {
-            Language::System => Self::System,
-            Language::English => Self::English,
-            Language::Portuguese => Self::Portuguese,
+            CliLanguage::System => Self::System,
+            CliLanguage::English => Self::English,
+            CliLanguage::Portuguese => Self::Portuguese,
         }
     }
 }
@@ -46,10 +48,10 @@ impl From<Language> for crate::config::application::Language {
 pub struct Cli {
     /// The theme of the application.
     #[arg(short, long)]
-    pub theme: Option<Theme>,
+    pub theme: Option<CliTheme>,
     /// The language of the application.
     #[arg(short, long)]
-    pub language: Option<Language>,
+    pub language: Option<CliLanguage>,
     /// The server to connect to.
     pub server: Option<String>,
 }

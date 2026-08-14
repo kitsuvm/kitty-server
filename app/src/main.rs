@@ -4,13 +4,16 @@ use std::process::{ExitCode, Termination};
 
 use clap::Parser;
 
-use crate::config::application::ApplicationConfig;
+use crate::resources::{
+    ResourceManager,
+    app_config::{AppConfig, AppLanguage},
+};
 
 mod application;
 mod cli;
-mod config;
 mod i18n;
 mod logger;
+mod resources;
 
 /// The error codes for the application.
 #[repr(u8)]
@@ -28,6 +31,8 @@ pub enum Error {
     ApplicationInit = 5,
     /// The application failed to initialize the i18n system.
     I18nInit = 6,
+    /// The application failed to load the resource manager.
+    ResourceManagerLoad = 7,
 }
 
 impl Termination for Error {
@@ -39,11 +44,19 @@ impl Termination for Error {
 /// The main function of the application.
 fn main() -> Result<(), Error> {
     let logger = logger::init()?;
+
     let cli = cli::Cli::parse();
-    let app_config =
-        ApplicationConfig::load_from_project_dirs(&logger.project_dirs).override_with_cli(&cli);
 
-    let i18n = i18n::init(app_config.language)?;
+    let resource_manager = ResourceManager::new(logger.project_dirs);
 
-    application::init(logger.project_dirs, i18n, app_config)
+    let app_config = resource_manager.load::<AppConfig>().map_err(|e| {
+        tracing::error!(?e, "Failed to load application configuration.");
+        Error::ResourceManagerLoad
+    })?;
+
+    let i18n = i18n::init(cli.language.map_or(app_config.language, AppLanguage::from))?;
+
+    let theme = cli.theme.map_or(app_config.theme, |t| t.into());
+
+    application::init(resource_manager, i18n, app_config, theme)
 }

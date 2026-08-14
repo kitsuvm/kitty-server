@@ -1,26 +1,78 @@
-use directories::ProjectDirs;
+use std::fmt;
+
 use iced::{Task, application::BootFn, system};
 use kitty_theme_iced::{theme::Theme, window_event};
 
 use crate::{
     application::{message::Message, modal::ModalState, screen::ScreenState},
-    config::{application::ApplicationConfig, servers::Servers},
     i18n::I18n,
+    resources::{
+        ResourceManager,
+        app_config::{AppConfig, AppTheme},
+        hosts::HostsManager,
+    },
 };
 
+/// Represents the state of a lazy-loaded resource, which can be in one of three states: loading, data, or error.
+#[derive(Default)]
+pub enum Lazy<T> {
+    /// The resource is currently loading.
+    #[default]
+    Loading,
+    /// The resource has been successfully loaded and contains data.
+    Data(T),
+    /// An error occurred while loading the resource, with an associated error message.
+    Error(String),
+}
+
+impl<T> From<Result<T, String>> for Lazy<T> {
+    fn from(result: Result<T, String>) -> Self {
+        match result {
+            Ok(data) => Self::Data(data),
+            Err(err) => Self::Error(err),
+        }
+    }
+}
+
+impl<T> From<T> for Lazy<T> {
+    fn from(data: T) -> Self {
+        Self::Data(data)
+    }
+}
+
+impl<T: fmt::Debug> fmt::Debug for Lazy<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Loading => write!(f, "LazyState::Loading"),
+            Self::Data(data) => write!(f, "LazyState::Data({:?})", data),
+            Self::Error(err) => write!(f, "LazyState::Error({:?})", err),
+        }
+    }
+}
+
+impl<T: Clone> Clone for Lazy<T> {
+    fn clone(&self) -> Self {
+        match self {
+            Self::Loading => Self::Loading,
+            Self::Data(data) => Self::Data(data.clone()),
+            Self::Error(err) => Self::Error(err.clone()),
+        }
+    }
+}
+
 /// The global state of the application.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct GlobalState {
     /// The project directories of the application.
-    pub project_dirs: ProjectDirs,
+    pub resource_manager: ResourceManager,
     /// The i18n language loader of the application.
     pub i18n: I18n,
-    /// The application configuration.
-    pub app_config: ApplicationConfig,
+    /// The configuration of the application.
+    pub app_config: AppConfig,
 }
 
 /// The state of the application.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct State {
     /// Whether the window is maximized.
     pub window_state: window_event::State,
@@ -36,15 +88,15 @@ pub struct State {
 
 /// Boots the application, loading the servers from the configuration file.
 pub fn boot(
-    project_dirs: ProjectDirs,
+    resource_manager: ResourceManager,
     i18n: I18n,
-    app_config: ApplicationConfig,
+    app_config: AppConfig,
+    theme: AppTheme,
 ) -> impl BootFn<State, Message> {
     tracing::info!("Booting application...");
 
     move || {
-        let project_dirs = project_dirs.clone();
-        let theme = app_config.theme.into();
+        let resource_manager = resource_manager.clone();
 
         (
             State {
@@ -52,17 +104,16 @@ pub fn boot(
                 screen: ScreenState::default(),
                 modal: ModalState::None,
                 global_state: GlobalState {
-                    project_dirs: project_dirs.clone(),
+                    resource_manager: resource_manager.clone(),
                     i18n: i18n.clone(),
                     app_config: app_config.clone(),
                 },
-                theme,
+                theme: theme.into(),
             },
             Task::batch([
-                Task::perform(
-                    async move { Servers::load_from_project_dirs(&project_dirs) },
-                    |v| Message::ServersUpdate(v.into()),
-                ),
+                Task::perform(async move { HostsManager::new(&resource_manager) }, |v| {
+                    Message::LoadedHostsManager(v.into())
+                }),
                 system::theme().map(Message::ChangedThemeMode),
             ]),
         )

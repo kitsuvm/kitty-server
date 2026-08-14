@@ -11,8 +11,13 @@ use kitty_theme_iced::{
 };
 
 use crate::{
-    application::{message::Message, modal::Modal, screen::ScreenState, state::GlobalState},
-    config::servers::{SSHServer, Servers, ServersState},
+    application::{
+        message::Message,
+        modal::Modal,
+        screen::ScreenState,
+        state::{GlobalState, Lazy},
+    },
+    resources::hosts::{HostsManager, SshHost},
     t,
 };
 
@@ -37,9 +42,9 @@ impl AsRef<State> for State {
     }
 }
 
-impl From<&State> for SSHServer {
+impl From<&State> for SshHost {
     fn from(state: &State) -> Self {
-        SSHServer {
+        SshHost {
             host: state.host.clone(),
             port: state.port.parse().ok(),
             username: if !state.username.is_empty() {
@@ -134,40 +139,17 @@ impl Modal for State {
             return (false, Task::none());
         }
 
-        let mut servers =
-            Servers::load_from_project_dirs(&global_state.project_dirs).unwrap_or_default();
+        let mut hosts = HostsManager::new(&global_state.resource_manager);
 
-        servers.ssh_servers.push(self.as_ref().into());
-
-        let current_servers = match screen {
-            ScreenState::ServerList(state) => match &state.servers_state {
-                ServersState::Data(servers) => Some(servers.clone()),
-                _ => None,
-            },
-        };
-
-        let servers_state = match servers.save_to_project_dirs(&global_state.project_dirs) {
-            Ok(_) => {
-                tracing::info!("Saved connection configuration file, reloading...");
-                ServersState::Data(match current_servers {
-                    Some(mut v) => {
-                        v.servers = servers;
-                        v
-                    }
-                    None => servers.into(),
-                })
-            }
-            Err(e) => {
-                tracing::error!("Could not save connection configuration file: {}", e);
-                ServersState::Error(e)
-            }
-        };
+        if let Err(e) = hosts.push(&global_state.resource_manager, self.as_ref().into()) {
+            tracing::error!(?e, "Failed to save host to disk");
+        }
 
         match screen {
             ScreenState::ServerList(state) => {
-                state.servers_state = servers_state;
+                state.internal = Lazy::Data(hosts);
             }
-        };
+        }
 
         (true, Task::none())
     }

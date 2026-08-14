@@ -12,7 +12,7 @@ use kitty_theme_iced::{
 
 use crate::{
     application::{message::Message, modal::Modal, state::GlobalState},
-    config::application,
+    resources::app_config::{AppLanguage, AppTheme},
     t,
 };
 
@@ -30,14 +30,12 @@ impl Modal for State {
                 button(icon(icon::COMPUTER_ICON).center())
                     .width(Length::Fill)
                     .on_press_maybe(match current_theme {
-                        application::Theme::System => None,
-                        _ => Some(Message::ChangeThemeConfig(application::Theme::System)),
+                        AppTheme::System => None,
+                        _ => Some(Message::ChangeAppTheme(AppTheme::System)),
                     })
                     .style(move |theme: &Theme, status| {
                         let base = match current_theme {
-                            application::Theme::System => {
-                                button::primary(theme, button::Status::Active)
-                            }
+                            AppTheme::System => button::primary(theme, button::Status::Active),
                             _ => button::alt(theme, status),
                         };
 
@@ -53,14 +51,12 @@ impl Modal for State {
                 button(icon(icon::LIGHT_MODE_ICON).center())
                     .width(Length::Fill)
                     .on_press_maybe(match current_theme {
-                        application::Theme::Light => None,
-                        _ => Some(Message::ChangeThemeConfig(application::Theme::Light)),
+                        AppTheme::Light => None,
+                        _ => Some(Message::ChangeAppTheme(AppTheme::Light)),
                     })
                     .style(move |theme: &Theme, status| {
                         let base = match current_theme {
-                            application::Theme::Light => {
-                                button::primary(theme, button::Status::Active)
-                            }
+                            AppTheme::Light => button::primary(theme, button::Status::Active),
                             _ => button::alt(theme, status),
                         };
 
@@ -76,14 +72,12 @@ impl Modal for State {
                 button(icon(icon::DARK_MODE_ICON).center())
                     .width(Length::Fill)
                     .on_press_maybe(match current_theme {
-                        application::Theme::Dark => None,
-                        _ => Some(Message::ChangeThemeConfig(application::Theme::Dark)),
+                        AppTheme::Dark => None,
+                        _ => Some(Message::ChangeAppTheme(AppTheme::Dark)),
                     })
                     .style(move |theme: &Theme, status| {
                         let base = match current_theme {
-                            application::Theme::Dark => {
-                                button::primary(theme, button::Status::Active)
-                            }
+                            AppTheme::Dark => button::primary(theme, button::Status::Active),
                             _ => button::alt(theme, status),
                         };
 
@@ -104,14 +98,14 @@ impl Modal for State {
                     .center()
             )
             .on_press_maybe(match current_language {
-                application::Language::System => None,
-                _ => Some(Message::ChangeLanguageConfig(application::Language::System)),
+                AppLanguage::System => None,
+                _ => Some(Message::ChangeAppLanguage(AppLanguage::System)),
             })
             .width(Length::Fill)
             .padding(Padding::from(0).vertical(10))
             .style(move |theme: &Theme, status| {
                 let base = match current_language {
-                    application::Language::System => button::primary(theme, button::Status::Active),
+                    AppLanguage::System => button::primary(theme, button::Status::Active),
                     _ => button::alt(theme, status),
                 };
 
@@ -126,18 +120,14 @@ impl Modal for State {
             }),
             button(text("English").width(Length::Fill).center())
                 .on_press_maybe(match current_language {
-                    application::Language::English => None,
-                    _ => Some(Message::ChangeLanguageConfig(
-                        application::Language::English
-                    )),
+                    AppLanguage::English => None,
+                    _ => Some(Message::ChangeAppLanguage(AppLanguage::English)),
                 })
                 .width(Length::Fill)
                 .padding(Padding::from(0).vertical(10))
                 .style(move |theme: &Theme, status| {
                     let base = match current_language {
-                        application::Language::English => {
-                            button::primary(theme, button::Status::Active)
-                        }
+                        AppLanguage::English => button::primary(theme, button::Status::Active),
                         _ => button::alt(theme, status),
                     };
 
@@ -152,18 +142,14 @@ impl Modal for State {
                 }),
             button(text("Português").width(Length::Fill).center())
                 .on_press_maybe(match current_language {
-                    application::Language::Portuguese => None,
-                    _ => Some(Message::ChangeLanguageConfig(
-                        application::Language::Portuguese
-                    )),
+                    AppLanguage::Portuguese => None,
+                    _ => Some(Message::ChangeAppLanguage(AppLanguage::Portuguese)),
                 })
                 .width(Length::Fill)
                 .padding(Padding::from(0).vertical(10))
                 .style(move |theme: &Theme, status| {
                     let base = match current_language {
-                        application::Language::Portuguese => {
-                            button::primary(theme, button::Status::Active)
-                        }
+                        AppLanguage::Portuguese => button::primary(theme, button::Status::Active),
                         _ => button::alt(theme, status),
                     };
 
