@@ -154,7 +154,7 @@ impl Host for PraticalHost {
 
 impl PartialEq for PraticalHost {
     fn eq(&self, other: &Self) -> bool {
-        self.title() == other.title()
+        self.hash() == other.hash()
     }
 }
 

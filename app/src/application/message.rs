@@ -9,7 +9,7 @@ use crate::{
     },
     i18n::change_language,
     resources::{
-        app_config::{AppConfig, AppLanguage, AppTheme},
+        app_config::{AppLanguage, AppTheme},
         hosts::HostsManager,
     },
 };
