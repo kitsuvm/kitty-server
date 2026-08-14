@@ -44,3 +44,11 @@ pub const ADD_ICON: char = '\u{e145}';
 pub const SEARCH_ICON: char = '\u{e8b6}';
 /// Chevron left icon using Material Symbols.
 pub const CHEVRON_LEFT_ICON: char = '\u{e5cb}';
+/// Computer icon using Material Symbols.
+pub const COMPUTER_ICON: char = '\u{e30a}';
+/// Light mode icon using Material Symbols.
+pub const LIGHT_MODE_ICON: char = '\u{e518}';
+/// Dark mode icon using Material Symbols.
+pub const DARK_MODE_ICON: char = '\u{e51c}';
+/// Menu icon using Material Symbols.
+pub const MENU_ICON: char = '\u{e5d2}';
