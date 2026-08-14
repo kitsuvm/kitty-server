@@ -1,4 +1,4 @@
-use iced::{Task, theme::Mode};
+use iced::{Task, system, theme::Mode};
 use kitty_theme_iced::window_event;
 
 use crate::{
@@ -7,7 +7,8 @@ use crate::{
         screen::{Screen, ScreenState},
         state::State,
     },
-    config::servers::ServersState,
+    config::{self, servers::ServersState},
+    i18n::change_language,
 };
 
 /// The messages of the application.
@@ -31,6 +32,10 @@ pub enum Message {
     ServersUpdate(ServersState),
     /// Refresh the screen state.
     Refresh,
+    /// The application theme configuration has changed.
+    ChangeThemeConfig(config::application::Theme),
+    /// The application language configuration has changed.
+    ChangeLanguageConfig(config::application::Language),
 }
 
 /// Updates the state of the application.
@@ -86,6 +91,32 @@ pub fn update(state: &mut State, message: Message) -> Task<Message> {
         }
         Message::Refresh => {
             state.screen.refresh();
+            Task::none()
+        }
+        Message::ChangeThemeConfig(theme) => {
+            state.global_state.app_config.theme = theme;
+
+            let task = if !state.global_state.app_config.theme.is_system() {
+                state.theme = state.global_state.app_config.theme.into();
+                Task::none()
+            } else {
+                system::theme().map(Message::ChangedThemeMode)
+            };
+
+            let _ = state
+                .global_state
+                .app_config
+                .save_to_project_dirs(&state.global_state.project_dirs);
+
+            task
+        }
+        Message::ChangeLanguageConfig(language) => {
+            state.global_state.app_config.language = language;
+            let _ = change_language(&state.global_state.i18n, language);
+            let _ = state
+                .global_state
+                .app_config
+                .save_to_project_dirs(&state.global_state.project_dirs);
             Task::none()
         }
     }

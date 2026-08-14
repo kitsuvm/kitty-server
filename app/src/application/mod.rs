@@ -1,10 +1,10 @@
 //! This module contains the main application logic for the Kitty Server application, including initialization, event handling, and rendering of the user interface.
 
 use directories::ProjectDirs;
-use iced::{Renderer, Subscription, system};
+use iced::{Length, Padding, Renderer, Subscription, system, widget::container};
 use kitty_theme_iced::{
     theme::{Theme, default_settings, default_window_settings},
-    widget::{application::application_style, window},
+    widget::{application::application_style, icon, icon_button, window},
     window_event,
 };
 
@@ -62,10 +62,18 @@ fn subscription(_: &State) -> Subscription<Message> {
 
 /// Renders the view of the application based on the current state.
 fn view<'a>(state: &'a State) -> window::Window<'a, Message, Theme, Renderer> {
-    tracing::trace!(?state, "Rendering view...");
+    tracing::trace!("Rendering view...");
     let mut window = window(state.screen.content(&state.global_state))
         .on_event(Message::Window)
-        .window_state(state.window_state);
+        .window_state(state.window_state)
+        .window_bar_extra(
+            container(
+                icon_button(icon::MENU_ICON)
+                    .on_press(Message::OpenModal(modal::ModalKind::Configuration)),
+            )
+            .padding(Padding::from(0).right(10))
+            .align_bottom(Length::Fill),
+        );
 
     if let Some(opposite) = state.screen.window_bar_opposite() {
         window = window.window_bar_opposite(opposite);

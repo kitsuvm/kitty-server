@@ -72,7 +72,7 @@ impl Screen for State {
     }
 
     fn window_bar_side_width(&self) -> Option<Length> {
-        Some(120.into())
+        Some(150.into())
     }
 
     fn window_bar_opposite<'a>(&'a self) -> Option<Element<'a, Message, Theme, Renderer>> {

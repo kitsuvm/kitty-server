@@ -11,6 +11,7 @@ use crate::{
     impl_modal,
 };
 
+pub mod configuration;
 pub mod macros;
 pub mod server_add;
 
@@ -37,6 +38,7 @@ pub trait Modal {
 impl_modal! {
     ModalState, ModalKind {
         ServerAdd(server_add::State),
+        Configuration(configuration::State),
     }
 }
 

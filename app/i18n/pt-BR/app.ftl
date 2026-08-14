@@ -14,3 +14,4 @@ username = Nome de usuário
     .example = root
 close = Fechar
 add = Adicionar
+system = Sistema
