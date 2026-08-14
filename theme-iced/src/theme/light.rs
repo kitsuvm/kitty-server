@@ -39,19 +39,19 @@ pub const LIGHT_EXTENDED_PALETTE: Extended = Extended {
             text: color!(0x7e7e7f),
         },
         neutral: Pair {
-            color: color!(0xeaeaea),
+            color: color!(0xcecece),
             text: color!(0x7e7e7f),
         },
         strong: Pair {
-            color: color!(0xeaeaea),
+            color: color!(0xcecece),
             text: color!(0x7e7e7f),
         },
         stronger: Pair {
-            color: color!(0xeaeaea),
+            color: color!(0xcecece),
             text: color!(0x7e7e7f),
         },
         strongest: Pair {
-            color: color!(0xeaeaea),
+            color: color!(0xcecece),
             text: color!(0x7e7e7f),
         },
     },

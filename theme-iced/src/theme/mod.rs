@@ -14,7 +14,7 @@ use crate::{
     BaseExtended,
     font::{LATO_BOLD_FONT, fonts},
     theme::{
-        dark::{DARK_EXTERNAL_PALETTE, DARK_PALETTE},
+        dark::{DARK_EXTENDED_PALETTE, DARK_PALETTE},
         light::{LIGHT_EXTENDED_PALETTE, LIGHT_PALETTE},
     },
     widget::{
@@ -74,7 +74,7 @@ impl Theme {
     pub fn extended(&self) -> Extended {
         match self {
             Self::Light => LIGHT_EXTENDED_PALETTE,
-            Self::Dark => DARK_EXTERNAL_PALETTE,
+            Self::Dark => DARK_EXTENDED_PALETTE,
         }
     }
 
@@ -147,9 +147,7 @@ impl iced_widget::text::Catalog for Theme {
     type Class<'a> = iced_widget::text::StyleFn<'a, Self>;
 
     fn default<'a>() -> Self::Class<'a> {
-        Box::new(|theme: &Theme| text::Style {
-            color: Some(theme.palette().text),
-        })
+        Box::new(|_: &Theme| text::Style { color: None })
     }
 
     fn style(&self, item: &Self::Class<'_>) -> text::Style {

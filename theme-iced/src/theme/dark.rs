@@ -18,7 +18,8 @@ pub const DARK_PALETTE: Palette = Palette {
     danger: color!(0xff0000),
 };
 
-pub const DARK_EXTERNAL_PALETTE: Extended = Extended {
+/// The extended palette for the dark theme.
+pub const DARK_EXTENDED_PALETTE: Extended = Extended {
     is_dark: true,
     background: Background {
         base: Pair {
@@ -26,15 +27,15 @@ pub const DARK_EXTERNAL_PALETTE: Extended = Extended {
             text: color!(0xffffff),
         },
         weakest: Pair {
-            color: color!(0x232323),
+            color: color!(0x0f0f0f),
             text: color!(0x515151),
         },
         weaker: Pair {
-            color: color!(0x232323),
+            color: color!(0x0f0f0f),
             text: color!(0x515151),
         },
         weak: Pair {
-            color: color!(0x232323),
+            color: color!(0x0f0f0f),
             text: color!(0x515151),
         },
         neutral: Pair {
